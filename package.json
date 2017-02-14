@@ -1,0 +1,31 @@
+{
+  "name": "portofportland-save-map-view",
+  "version": "0.0.1",
+  "description": "Very small server to save map views",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheGartrellGroup/Mapbox-GL-JS-save-view"
+  },
+  "keywords": [
+    "mapbox-GL-JS"
+  ],
+  "author": "Ben Sainsbury",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TheGartrellGroup/Mapbox-GL-JS-save-view/issues"
+  },
+  "homepage": "https://github.com/TheGartrellGroup/Mapbox-GL-JS-save-view",
+  "dependencies": {
+    "jsonfile": "^2.4.0",
+    "jsonschema": "^1.1.1",
+    "node-uuid": "^1.4.7"
+  },
+  "devDependencies": {
+    "mocha": "^3.2.0",
+    "supertest": "^3.0.0"
+  }
+}
