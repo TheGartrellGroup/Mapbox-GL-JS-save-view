@@ -6,7 +6,7 @@ Client and server code to save views of Mapbox-GL-JS applications.
 
 ## Backend
 
-The backend consists of a very simple node express app that sends and receives saved view objects.  I've implemented both a save to file option, and a save to database (SQLite) option.
+The backend consists of a very simple node express app that sends and receives saved view objects.  The code includes both a save to file option, and a save to database (SQLite) option as specified in the top of the server.js file.
 
 ## Installation
 
@@ -15,9 +15,30 @@ The backend consists of a very simple node express app that sends and receives s
 Running node on Windows is fairly simple, but requires slight orchestration. These are the steps to install.
 
 1. If you don't have node installed, you should install it.
-2. We're going to run a node server that will listen on port 3000.
-3. We're going to create a windows service that will "host" the node server.
-3. We're going to run a .net reverse proxy that will accept incoming requests from clients and forward them to the host windows service/node server.
+2. Clone the repository or cd into it.
+3. Install save view dependencies.
+ * `npm install`
+4. Run tests
+ * `npm test`
+5. Run server to ensure it's working
+ * Open up server.js code and adjust variables (port, save mode) as needed.
+ * `node server`
+ * hit localhost:4005 - you should receive the test client app.
+6. Install Windows Service to 'host' node server
+ * Open service.js file and adjust the service name filepath as needed - it needs to point to the server.js file.
+ * `node service.js` - to install.
+ * Once installed, the service can be stopped/started etc.
+7. Install .NET proxy
+ 1. CD to dotnet_reverse_proxy
+ 2. Open web.config - adjust parameters at top  PORTS/APPNAME (APPNAME must match the name of the application in step 5)
+ 3. From windows run line: `inetmgr`
+ 4. Right-click on web server and select 'Add Application'
+ 5. Call it whatever you like, it will be the name of the app that will be used externally.
+ 6. Assign to ASP.NET 4.0 AppPool or application pool of your choice.
+8. Test
+ * With the Windows service running, and the proxy functioning, you should now be able to access the node application via port 80 (or 443) and IIS.
+ * The address will be //yourserver.com/APPNAME
+ * Test saving views, turning layers on and off, reordering layers, drawing markup etc.
 
 ### Linux
 

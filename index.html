@@ -4,10 +4,13 @@
     <meta charset='utf-8' />
     <title></title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.js'></script>
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.css' rel='stylesheet' />
-    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.16.0/mapbox-gl-draw.js'></script>
-<link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.16.0/mapbox-gl-draw.css' type='text/css'/>
+
+    <link href='https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css' rel='stylesheet' />
+    <link rel='stylesheet' href='https://cdn.rawgit.com/TheGartrellGroup/Mapbox-GL-JS-Layer-Tree/1acbd047/dist/css/styles.min.css'/>
+    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.16.0/mapbox-gl-draw.css' type='text/css'/>
+
+
     <style>
         body { margin:0; padding:0; }
         #map { position:absolute; top:0; bottom:0; width:100%; }
@@ -69,98 +72,146 @@
 <nav id="menu"></nav>
 <nav id="menu2"></nav>
 <div id="map"></div>
+  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.js'></script>
+    <script src='https://cdn.rawgit.com/TheGartrellGroup/Mapbox-GL-JS-Layer-Tree/1acbd047/dist/js/scripts.min.js'></script>
+   <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.16.0/mapbox-gl-draw.js'></script>
 <script>
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiYnJ5Y2VnYXJ0cmVsbCIsImEiOiJhWkYwRGQ0In0.-LsFFcDkzDELHt4E2BOrsQ';
 
-var API = '//localhost:3000/';
-
 var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/streets-v9',
-    zoom: 15,
-    center: [-71.97722138410576, -13.517379300798098]
+    center: [-95.9980, 41.2524],
+    zoom: 4
 });
 
-var draw = new MapboxDraw({
-        displayControlsDefault: false,
-        controls: {
-            polygon: true
+map.on('load', function () {
+
+    map.addSource('land', { type: 'geojson', data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_land.geojson' });
+    map.addLayer({
+        "id": "land",
+        "type": "fill",
+        "source": "land",
+        "layout": {
+            "visibility": 'visible'
+        },
+        "paint": {
+            'fill-color': '#a89b97',
+            'fill-opacity': 0.8
         }
     });
+
+    map.addSource('state-boundaries', { type: 'geojson', data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_1_states_provinces_shp.geojson' });
+    map.addLayer({
+        "id": "state-boundaries",
+        "type": "fill",
+        "source": "state-boundaries",
+        "layout": {
+            "visibility": 'visible'
+        },
+        "paint": {
+            'fill-color': '#CEE5C2',
+            'fill-opacity': 0.8,
+            'fill-outline-color': '#2b2424'
+        }
+    });
+
+    map.addSource('elevation', { type: 'geojson', data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_geography_regions_elevation_points.geojson' });
+    map.addLayer({
+        "id": "elevation-points",
+        "type": "circle",
+        "source": "elevation",
+        "layout": {
+            "visibility": 'visible'
+        },
+        "paint": {
+            'circle-color': '#eae00b',
+            'circle-opacity': 0.8,
+            'circle-stroke-color': '#2b2424',
+            'circle-stroke-width': 1
+        }
+    });
+
+
+    map.addSource('railroads', { 'type': 'geojson', 'data': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_railroads_north_america.geojson'});
+    map.addLayer({
+        "id": "railroads",
+        "type": "line",
+        "source": "railroads",
+        "layout": {
+            'visibility': 'visible'
+        },
+        "paint": {
+            "line-color": "#c7515f",
+            "line-width": 3,
+            "line-dasharray": [4,4],
+        }
+    });
+
+    map.addSource('airports', { type: 'geojson', data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson' });
+    map.addLayer({
+        "id": "airports",
+        "type": "symbol",
+        "source": "airports",
+        "layout": {
+            "visibility": 'visible',
+            'icon-image': 'airport-11'
+
+        },
+        "paint": {}
+    });
+
+});
+
+var layers =
+[
+    {
+        'name': 'Land',
+        'id': 'land',
+        'source': 'land',
+        'directory': 'Misc',
+    },
+    {
+        'name': 'State Boundaries',
+        'id': 'state-boundaries',
+        'source': "state-boundaries",
+        'directory': 'Misc',
+    },
+    {
+        'name': 'Elevated Points',
+        'id': 'elevation-points',
+        'source': 'elevation',
+        'directory': 'Misc',
+    },
+    {
+        'name': 'Railroads',
+        'id': 'railroads',
+        'source': 'railroads',
+        'directory': 'Transportation',
+    },
+    {
+        'name': 'Airports',
+        'id': 'airports',
+        'source': 'airports',
+        'directory': 'Transportation',
+        'icon': 'icons/airplane.svg'
+    },
+
+];
+
+var draw = new MapboxDraw({
+    displayControlsDefault: false,
+    controls: {
+        polygon: true
+    }
+});
 
 map.addControl(draw);
 
-map.on('load', function () {
-    map.addSource('museums', {
-        type: 'vector',
-        url: 'mapbox://mapbox.2opop9hr'
-    });
-    map.addLayer({
-        'id': 'museums',
-        'type': 'circle',
-        'source': 'museums',
-        'layout': {
-            'visibility': 'visible'
-        },
-        'paint': {
-            'circle-radius': 8,
-            'circle-color': 'rgba(55,148,179,1)'
-        },
-        'source-layer': 'museum-cusco'
-    });
-
-    map.addSource('contours', {
-        type: 'vector',
-        url: 'mapbox://mapbox.mapbox-terrain-v2'
-    });
-    map.addLayer({
-        'id': 'contours',
-        'type': 'line',
-        'source': 'contours',
-        'source-layer': 'contour',
-        'layout': {
-            'visibility': 'visible',
-            'line-join': 'round',
-            'line-cap': 'round'
-        },
-        'paint': {
-            'line-color': '#877b59',
-            'line-width': 1
-        }
-    });
-
-});
-
-var toggleableLayerIds = [ 'contours', 'museums' ];
-
-for (var i = 0; i < toggleableLayerIds.length; i++) {
-    var id = toggleableLayerIds[i];
-
-    var link = document.createElement('a');
-    link.href = '#';
-    link.className = 'active';
-    link.textContent = id;
-
-    link.onclick = function (e) {
-        var clickedLayer = this.textContent;
-        e.preventDefault();
-        e.stopPropagation();
-
-        var visibility = map.getLayoutProperty(clickedLayer, 'visibility');
-
-        if (visibility === 'visible') {
-            map.setLayoutProperty(clickedLayer, 'visibility', 'none');
-            this.className = '';
-        } else {
-            this.className = 'active';
-            map.setLayoutProperty(clickedLayer, 'visibility', 'visible');
-        }
-    };
-
-    var layers = document.getElementById('menu');
-    layers.appendChild(link);
-}
+// Add zoom and rotation controls to the map.
+map.addControl(new mapboxgl.NavigationControl());
+map.addControl(new LayerTree({layers: layers}), 'bottom-left');
 
 var saveViewButton = document.getElementById('menu2')
 
