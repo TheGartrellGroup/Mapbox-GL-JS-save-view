@@ -106,7 +106,8 @@ var mapStateSchema = {
 	},
 	"required":["map", "layers"],
 	"additionalProperties": false
-}```
+}
+```
 
 
 # Usage
