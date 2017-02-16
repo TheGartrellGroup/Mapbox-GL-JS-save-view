@@ -28,13 +28,14 @@ Running node on Windows is fairly simple, but requires slight orchestration. The
  * Open service.js file and adjust the service name filepath as needed - it needs to point to the server.js file.
  * `node service.js` - to install.
  * Once installed, the service can be stopped/started etc.
-7. Install .NET proxy
+7. Complile and set up .NET proxy
  1. CD to dotnet_reverse_proxy
- 2. Open web.config - adjust parameters at top  PORTS/APPNAME (APPNAME must match the name of the application in step 5)
- 3. From windows run line: `inetmgr`
- 4. Right-click on web server and select 'Add Application'
- 5. Call it whatever you like, it will be the name of the app that will be used externally.
- 6. Assign to ASP.NET 4.0 AppPool or application pool of your choice.
+ 2. `msbuild` or simply use binary that is included with code
+ 3. Open web.config - adjust parameters at top  PORTS/APPNAME (APPNAME must match the name of the application in step 6)
+ 4. From windows run line: `inetmgr`
+ 5. Right-click on web server and select 'Add Application'
+ 6. Call it whatever you like, it will be the name of the app that will be used externally.
+ 7. Assign to ASP.NET 4.0 AppPool or application pool of your choice.
 8. Test
  * With the Windows service running, and the proxy functioning, you should now be able to access the node application via port 80 (or 443) and IIS.
  * The address will be //yourserver.com/APPNAME
