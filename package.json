@@ -23,7 +23,8 @@
     "body-parser": "^1.16.1",
     "jsonfile": "^2.4.0",
     "jsonschema": "^1.1.1",
-    "node-uuid": "^1.4.7"
+    "node-uuid": "^1.4.7",
+    "sqlite3": "^3.1.8"
   },
   "devDependencies": {
     "mocha": "^3.2.0",

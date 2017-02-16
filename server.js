@@ -2,10 +2,12 @@
 /* Deps */
 var express = require('express'),
 jsonfile = require('jsonfile'),
-//sqlite3 = require('sqlite3'),
+//
 uuid = require('node-uuid'),
 Validator = require('jsonschema').Validator,
 bodyParser = require('body-parser')
+
+var SAVETO = 'JSONFILE' // or 'SQLITE'
 
 var v = new Validator();
 
@@ -44,7 +46,7 @@ var layerSchema  = {
 		},
 		"visibility": {
 			"type": "string",
-			"pattern": /(visibility|none)/,
+			"pattern": /(visible|none)/,
 			"required": true
 		},
 		"paint": {
@@ -56,12 +58,12 @@ var layerSchema  = {
 	}
 }
 
-
 var mapStateSchema = {
 	"type":"object",
 	"properties":{
 		"map" : {"$ref": "/mapSchema"},
-		"layers": {'type':"array", "items":{"$ref": "layerSchema"} }
+		"layers": {'type':"array", "items":{"$ref": "layerSchema"} },
+		"shapes": {'type':'object'}
 	},
 	"required":["map", "layers"],
 	"additionalProperties": false
@@ -88,9 +90,8 @@ app.post('/view/', function (req, res) {
 		return res.status(400).end('{"status": "failure", "message":"Must provide a JSON view object."}');
 	}
 
-	if(typeof(req.body) !== 'object'){
+	if(typeof(req.body) !== 'object' || !Object.keys(req.body).length){
 		return res.status(400).end('{"status": "failure", "message":"Must provide a JSON object."}');
-		
 	}
 
 	var valid = v.validate(req.body, mapStateSchema)
@@ -100,13 +101,16 @@ app.post('/view/', function (req, res) {
 		return res.status(400).end('{"status": "failure", "message":"'+error_message+'"}');
 	}
 
-	var id = uuid.v1().substr(0, 8); 
+	if(SAVETO === 'JSONFILE'){
+		_writeViewToJSONFile(req.body, function( msg){
+			return res.status(200).end(msg)
+		});
+	} else {
+		_writeViewToSQLiteDB(req.body, function(msg){
+			return res.status(200).end(msg)
+		})
+	}
 
-	jsonfile.writeFile('./data/'+id+'.json',req.body, function(err){
-
-		return res.status(200).end('{"status": "success", "message":"Saved view", "id":"'+id+'"}');
-	})
-	
 });
 
 /* read views via get */
@@ -143,5 +147,36 @@ app.use(function(req,res){
 app.listen(3000, function () {
   console.log('Example app listening on port 3000!')
 })
+
+function _writeViewToJSONFile(jsonobj, cb){
+
+	var id = uuid.v1().substr(0, 8); 
+
+	jsonfile.writeFile('./data/'+id+'.json',jsonobj, function(err){
+		if(err){
+			cb('{"status": "error", "message":"'+err+'"}')
+		} else {
+			cb('{"status": "success", "message":"Saved view", "id":"'+id+'"}');
+		}
+	})
+}
+
+function _writeViewToSQLiteDB(jsonObj, cb){
+
+	sqlite3 = require('sqlite3')
+
+	var db = 'db/views.db';
+
+	var id = uuid.v1().substr(0, 8); 
+
+	db.exec("insert into views (id, view) values ('"+id+"', '" +JSON.stringify(jsonObj)+ "')", function(err, row) {
+
+		if(err){
+			cb('{"status" : "failure", "msg": "'+err+'"}');
+		} else {
+			cb('{"status" :"success", "msg":"Saved view '+id+'"}');
+		}
+	})
+}
 
 module.exports = app
