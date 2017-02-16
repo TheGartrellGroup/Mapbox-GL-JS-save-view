@@ -49,7 +49,8 @@ Running node on Linux is similar in that the best practice is to use a reverse p
 
 The server code validates (using jsonschema) an uploaded mapView object according to the following schema:
 
- ```var mapSchema = {
+ ```json
+ var mapSchema = {
 	"id":'/mapSchema',
 	"type":"object",
 	"properties":{
