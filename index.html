@@ -82,13 +82,14 @@ var map = new mapboxgl.Map({
     center: [-71.97722138410576, -13.517379300798098]
 });
 
- var draw = new MapboxDraw({
+var draw = new MapboxDraw({
         displayControlsDefault: false,
         controls: {
             polygon: true
         }
     });
-    map.addControl(draw);
+
+map.addControl(draw);
 
 map.on('load', function () {
     map.addSource('museums', {
@@ -179,6 +180,21 @@ function saveView(){
 
     var layers = map.getStyle().layers.filter(function(lyr){return (lyr.source && lyr.source !== 'composite' && lyr.source.indexOf('mapbox-gl-draw')==-1)})
 
+    for(var i=layers.length-1;i>-1;i--){
+        if(layers[i].source =='markup'){
+
+            var data = map.getSource('markup')._data;
+
+            if(shapes){
+                //concat features
+                shapes.features = shapes.features.concat(data.features);
+            } else {
+                shapes = map.getSource('markup')._data;
+            }
+            layers.splice(i, 1);
+        }
+    }
+
     layers = layers.map(function(lyr){return {'id':lyr.id, 'visibility':(map.getLayoutProperty(lyr.id,"visibility") || 'visible')}})
 
     var obj = {
@@ -225,27 +241,35 @@ function applyView(viewObj){
     map.setPitch(viewObj.map.pitch);
     map.setCenter(viewObj.map.center);
 
+    function addShapes(shapes){
+        map.addSource("markup", {
+            "type": "geojson",
+            "data": shapes
+        });
+
+        map.addLayer({
+            "id":"markup",
+            "type": "fill",
+            "source": "markup",
+            "paint": {
+                "fill-color": "#888888",
+                "fill-opacity": 0.7,
+                "fill-outline-color":'#FF0000'
+            },
+            "visibility":'visible'
+        });
+    }
+
     //layers
-     if(viewObj.shapes){
-        map.on('style.load', function () { 
-
-            map.addSource("markup", {
-                "type": "geojson",
-                "data": viewObj.shapes
-            });
-
-            map.addLayer({
-                "id":"markup",
-                "type": "fill",
-                "source": "markup",
-                "paint": {
-                    "fill-color": "#888888",
-                    "fill-opacity": 0.7,
-                    "fill-outline-color":'#FF0000'
-                },
-                "visibility":'visible'
-            });
-        })
+    if(viewObj.shapes){
+        
+        if(map.style._loaded){
+            addShapes(viewObj.shapes);
+        } else {
+            map.on('style.load', function () { 
+                addShapes(viewObj.shapes);   
+            })
+        }
     }
 }
 
