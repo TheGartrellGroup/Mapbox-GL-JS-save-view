@@ -45,6 +45,69 @@ Running node on Windows is fairly simple, but requires slight orchestration. The
 
 Running node on Linux is similar in that the best practice is to use a reverse proxy, in this case Apache.  However instead of installing node as a service we would use a tool called 'forever' -- this is widely documented on the web and is very straightforward to install/use.
 
+# Validation
+
+The server code validates (using jsonschema) an uploaded mapView object according to the following schema:
+
+ var mapSchema = {
+	"id":'/mapSchema',
+	"type":"object",
+	"properties":{
+		"center": {
+			"type": "array",
+			"items": {
+				"type": "number",
+				"minItems": 2,
+      			"maxItems": 2
+			},
+			"required": true
+		},
+		"zoom": {
+			"type": "number",
+			"required": true
+		},
+		"bearing": {
+			"type": "number"
+		},
+		"pitch": {
+			"type": "number"
+		}
+	}
+}
+
+var layerSchema  = {
+	"type":"object",
+	"properties":{
+		"id": {
+			"type": "string",
+			"required": true
+		},
+		"visibility": {
+			"type": "string",
+			"pattern": /(visible|none)/,
+			"required": true
+		},
+		"paint": {
+			"type": "object"
+		},
+		"filter": {
+			"type": "object"
+		}
+	}
+}
+
+var mapStateSchema = {
+	"type":"object",
+	"properties":{
+		"map" : {"$ref": "/mapSchema"},
+		"layers": {'type':"array", "items":{"$ref": "layerSchema"} },
+		"shapes": {'type':'object'}
+	},
+	"required":["map", "layers"],
+	"additionalProperties": false
+}
+
+
 # Usage
 
 Express is a Model View Controller (MVC) framework that is very easy to use and setup.  For the purposes of this project, I am simply using it to create http routes with which to handle communication between the db/file server and the browser client.
@@ -56,7 +119,3 @@ In order to save a view the client application will POST a javascript viewState 
 ## Reading a view
 
 There are several ways that a view can be acquired. The simplest is via client-side javascript parsing the URL params on page load and issuing an AJAX request to GET the javascript object.  The more sophisticated approach would involve server-side rendering.  Only the former falls within the scope of this project, but it is worth mentioning and being aware of.
-
-# Questions
-
-Should views save loaded shapes from previous view loaded?
