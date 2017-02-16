@@ -15,7 +15,7 @@ The backend consists of a very simple node express app that sends and receives s
 Running node on Windows is fairly simple, but requires slight orchestration. These are the steps to install.
 
 1. If you don't have node installed, you should install it.
-2. Clone the repository or cd into it.
+2. Clone this repository or cd into it.
 3. Install save view dependencies.
  * `npm install`
 4. Run tests
