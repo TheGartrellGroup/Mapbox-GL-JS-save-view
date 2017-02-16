@@ -2,7 +2,7 @@ var Service = require('node-windows').Service;
 
 // Create a new service object
 var svc = new Service({
-  name:'Node.JS',
+  name:'Node.js - Save View',
   description: 'Node server to support Mapbox-GL-JS Save view',
   script: 'C:\\clientdata\\PortOfPortland\\Mapbox-GL-JS-save-view\\server.js'
 });

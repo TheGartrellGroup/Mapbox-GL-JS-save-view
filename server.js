@@ -144,7 +144,7 @@ app.use(function(req,res){
 	res.status(500).end('{"status": "failure", "message":"Please either POST data to the /view/ function or GET /view/ with a state id"}');
 });
 
-app.listen(3000, function () {
+app.listen(4001, function () {
   console.log('Example app listening on port 3000!')
 })
 
