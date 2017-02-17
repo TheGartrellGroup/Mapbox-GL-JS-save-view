@@ -68,6 +68,9 @@ var layerSchema  = {
 		},
 		"filter": {
 			"type": "object"
+		},
+		"directory":{
+			"type":"string"
 		}
 	}
 }

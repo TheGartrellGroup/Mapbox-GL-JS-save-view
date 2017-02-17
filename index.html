@@ -6,8 +6,8 @@
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.css' rel='stylesheet' />
 
-    <link href='https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css' rel='stylesheet' />
-    <link rel='stylesheet' href='https://cdn.rawgit.com/TheGartrellGroup/Mapbox-GL-JS-Layer-Tree/1acbd047/dist/css/styles.min.css'/>
+  <link href='https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css' rel='stylesheet' />
+    <link rel='stylesheet' href='https://cdn.rawgit.com/TheGartrellGroup/Mapbox-GL-JS-Layer-Tree/1acbd047/dist/css/styles.min.css'/> 
     <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.16.0/mapbox-gl-draw.css' type='text/css'/>
 
 
@@ -73,11 +73,13 @@
 <nav id="menu2"></nav>
 <div id="map"></div>
   <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.js'></script>
-    <script src='https://cdn.rawgit.com/TheGartrellGroup/Mapbox-GL-JS-Layer-Tree/1acbd047/dist/js/scripts.min.js'></script>
+  <script src='https://rawgit.com/TheGartrellGroup/Mapbox-GL-JS-Layer-Tree/master/dist/js/scripts.min.js'></script>
    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.16.0/mapbox-gl-draw.js'></script>
 <script>
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiYnJ5Y2VnYXJ0cmVsbCIsImEiOiJhWkYwRGQ0In0.-LsFFcDkzDELHt4E2BOrsQ';
+
+var VIEW;
 
 var map = new mapboxgl.Map({
     container: 'map',
@@ -133,7 +135,6 @@ map.on('load', function () {
         }
     });
 
-
     map.addSource('railroads', { 'type': 'geojson', 'data': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_railroads_north_america.geojson'});
     map.addLayer({
         "id": "railroads",
@@ -149,6 +150,20 @@ map.on('load', function () {
         }
     });
 
+    map.addLayer({
+        "id": "railroads2",
+        "type": "line",
+        "source": "railroads",
+        "layout": {
+            'visibility': 'visible'
+        },
+        "paint": {
+            "line-color": "#FFCC00",
+            "line-width": 3,
+            "line-dasharray": [1,1],
+        }
+    });
+
     map.addSource('airports', { type: 'geojson', data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson' });
     map.addLayer({
         "id": "airports",
@@ -161,6 +176,109 @@ map.on('load', function () {
         },
         "paint": {}
     });
+
+
+    if(VIEW && VIEW.shapes){
+
+        map.addSource("markup", {
+            "type": "geojson",
+            "data": VIEW.shapes
+        });
+
+        map.addLayer({
+            "id":"markup",
+            "type": "fill",
+            "source": "markup",
+            "paint": {
+                "fill-color": "#888888",
+                "fill-opacity": 0.7,
+                "fill-outline-color":'#FF0000'
+            },
+            "visibility":'visible'
+        });
+    }
+
+    if(VIEW && VIEW.layers && LayerTree){
+
+        $('.mapboxgl-ctrl.legend-container').on('show', function(){
+
+            var $lyr, newDirOrder = [], newLyrOrder = [];
+
+            VIEW.layers.forEach(function(lyr){
+
+                newLyrOrder.push(lyr.id);
+
+                if(lyr.visibility=='none'){
+                    map.setLayoutProperty(lyr.id, 'visibility', lyr.visibility);
+                    if(LayerTree){
+                        document.getElementById(lyr.id).children[0].checked = false;
+                    }
+                }
+
+                if(!newDirOrder[lyr.directory]){
+                    newDirOrder[lyr.directory] = [];
+                }
+
+                newDirOrder[lyr.directory].push(lyr.id);
+
+            })
+            
+            Object.keys(newDirOrder).reverse().forEach(function(dir){
+                $('#mapboxgl-legend').append($('#'+dir))
+                newDirOrder[dir].reverse().forEach(function(lyr){
+                    $lyr = $('#'+lyr);
+                    $('#'+dir).append($lyr);
+                    console.log({'dir':dir, "lyr":lyr})
+                })
+                
+            })
+
+            //directopry order
+
+            var orderArray = [];
+            var layers = map.getStyle().layers;
+
+            //newDirOrder.reverse();
+            //this loop starts at the directory above the lowest indexed
+            for (var i = newDirOrder.length - 2; i >= 0; i--) {
+                var dir = newDirOrder[i];
+                var layerArray = $('#' + dir).sortable('toArray');
+
+                for (var j = layerArray.length - 1; j >= 0; j--) {
+                    map.moveLayer(layerArray[j]);
+                };
+            }
+
+            // sort layers
+
+
+            var  orderArray =[];
+
+            for (var i =newLyrOrder.length - 1; i >= 0; i--) {
+
+                //findLayerIndex is a method exposed by LayerTree
+                var layerIndex = findLayerIndex(layers, newLyrOrder, i);
+
+                if (layerIndex) {
+                    var obj = {
+                        'originalOrder': layerIndex,
+                        'newOrder': i,
+                        'id': newLyrOrder[i]
+                    }
+                    orderArray.push(obj);
+                }
+            };
+
+            //move layer order
+            orderArray.sort(function(a, b) {
+                if (b.newOrder > a.newOrder) {
+                    map.moveLayer(a.id, b.id);
+                } else {
+                    map.moveLayer(b.id, a.id);
+                }
+            })
+        })
+    }
 
 });
 
@@ -197,6 +315,12 @@ var layers =
         'directory': 'Transportation',
         'icon': 'icons/airplane.svg'
     },
+    {
+        'name': 'Railroads 2',
+        'id': 'railroads2',
+        'source': 'railroads',
+        'directory': 'Transportation2',
+    }
 
 ];
 
@@ -225,6 +349,7 @@ saveView();
 
 saveViewButton.appendChild(link)
 
+
 function saveView(){
 
     var shapes = draw.getAll();
@@ -248,6 +373,11 @@ function saveView(){
 
     layers = layers.map(function(lyr){return {'id':lyr.id, 'visibility':(map.getLayoutProperty(lyr.id,"visibility") || 'visible')}})
 
+
+    layers.forEach(function(lyr){
+        lyr.directory = $('#'+lyr.id).parent().attr('id');
+    })
+
     var obj = {
         map:{
             zoom: map.getZoom(),
@@ -265,7 +395,12 @@ function saveView(){
     var oReq = new XMLHttpRequest();
 
     oReq.onload = function (e) {
-        location.hash='#'+oReq.response.id;
+        var obj = oReq.response;
+
+        if(typeof(obj) === 'string'){
+            obj = JSON.parse(obj)
+        }
+        location.hash='#'+obj.id;
     };
 
     oReq.open('POST', 'view/', true);
@@ -278,7 +413,13 @@ function saveView(){
 function getView(viewID){
     var oReq = new XMLHttpRequest();
     oReq.onload = function (e) {
-       applyView(oReq.response)
+
+        VIEW = oReq.response;
+
+        if(typeof(VIEW)==='string'){
+            VIEW =JSON.parse(VIEW)
+        }
+       applyView()
     };
     oReq.open('GET', './view/'+viewID, true);
     oReq.responseType = 'json';
@@ -287,41 +428,10 @@ function getView(viewID){
 
 function applyView(viewObj){
 
-    map.setZoom(viewObj.map.zoom);
-    map.setBearing(viewObj.map.bearing);
-    map.setPitch(viewObj.map.pitch);
-    map.setCenter(viewObj.map.center);
-
-    function addShapes(shapes){
-        map.addSource("markup", {
-            "type": "geojson",
-            "data": shapes
-        });
-
-        map.addLayer({
-            "id":"markup",
-            "type": "fill",
-            "source": "markup",
-            "paint": {
-                "fill-color": "#888888",
-                "fill-opacity": 0.7,
-                "fill-outline-color":'#FF0000'
-            },
-            "visibility":'visible'
-        });
-    }
-
-    //layers
-    if(viewObj.shapes){
-        
-        if(map.style._loaded){
-            addShapes(viewObj.shapes);
-        } else {
-            map.on('style.load', function () { 
-                addShapes(viewObj.shapes);   
-            })
-        }
-    }
+    map.setZoom(VIEW.map.zoom);
+    map.setBearing(VIEW.map.bearing);
+    map.setPitch(VIEW.map.pitch);
+    map.setCenter(VIEW.map.center);
 }
 
 var viewID=location.hash.replace('#','')
@@ -330,9 +440,51 @@ if(viewID){
     getView(viewID)
 }
 
+
+// https://tc39.github.io/ecma262/#sec-array.prototype.find
+if (!Array.prototype.find) {
+  Object.defineProperty(Array.prototype, 'find', {
+    value: function(predicate) {
+     // 1. Let O be ? ToObject(this value).
+      if (this == null) {
+        throw new TypeError('"this" is null or not defined');
+      }
+
+      var o = Object(this);
+
+      // 2. Let len be ? ToLength(? Get(O, "length")).
+      var len = o.length >>> 0;
+
+      // 3. If IsCallable(predicate) is false, throw a TypeError exception.
+      if (typeof predicate !== 'function') {
+        throw new TypeError('predicate must be a function');
+      }
+
+      // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
+      var thisArg = arguments[1];
+
+      // 5. Let k be 0.
+      var k = 0;
+
+      // 6. Repeat, while k < len
+      while (k < len) {
+        // a. Let Pk be ! ToString(k).
+        // b. Let kValue be ? Get(O, Pk).
+        // c. Let testResult be ToBoolean(? Call(predicate, T, « kValue, k, O »)).
+        // d. If testResult is true, return kValue.
+        var kValue = o[k];
+        if (predicate.call(thisArg, kValue, k, o)) {
+          return kValue;
+        }
+        // e. Increase k by 1.
+        k++;
+      }
+
+      // 7. Return undefined.
+      return undefined;
+    }
+  });
+}
 </script>
-
-
-
 </body>
 </html>
