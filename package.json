@@ -21,6 +21,7 @@
   "homepage": "https://github.com/TheGartrellGroup/Mapbox-GL-JS-save-view",
   "dependencies": {
     "body-parser": "^1.16.1",
+    "express": "^4.14.1",
     "font-awesome": "^4.7.0",
     "jsonfile": "^2.4.0",
     "jsonschema": "^1.1.1",

@@ -12,10 +12,11 @@ var SAVETO = 'JSONFILE';
 
 var sqlite3, db;
 var readView, writeView;
-if(SAVETO === 'SQLITE'){
 
+if(SAVETO === 'SQLITE'){
 	sqlite3 = require('sqlite3')
 	db = new sqlite3.Database('db/views.db');
+	db.run("PRAGMA journal_mode = WAL");
 	readView = _readViewFromSQLiteDB;
 	writeView = _writeViewToSQLiteDB;
 } else {
