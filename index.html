@@ -15,7 +15,7 @@
         body { margin:0; padding:0; }
         #map { position:absolute; top:0; bottom:0; width:100%; }
     
-        #menu, #menu2 {
+        #menu, #menu2, #menu3 {
             background: #fff;
             position: absolute;
             z-index: 1;
@@ -36,7 +36,12 @@
             right: 10px;
         }
 
-        #menu a, #menu2 a {
+        #menu3{
+            bottom: 70px;
+            right: 10px;
+        }
+
+        #menu a, #menu2 a, #menu3 a {
             font-size: 13px;
             color: #404040;
             display: block;
@@ -48,22 +53,25 @@
             text-align: center;
         }
 
-        #menu a:last-child, #menu2 a:last-child {
+        #menu a:last-child, #menu2 a:last-child, #menu3 a:last-child {
             border: none;
         }
 
-        #menu a:hover, #menu2 a:hover {
+        #menu a:hover, #menu2 a:hover, #menu3 a:hover {
             background-color: #f8f8f8;
             color: #404040;
         }
 
-        #menu a.active, #menu2 a.active {
+        #menu a.active, #menu2 a.active, #menu3 a:active {
             background-color: #3887be;
             color: #ffffff;
         }
 
-        #menu a.active:hover, #menu2 a.active:hover {
+        #menu a.active:hover, #menu2 a.active:hover, #menu3 a.active:hover {
             background: #3074a4;
+        }
+        .click-button{
+            cursor:pointer;
         }
     </style>
 </head>
@@ -349,7 +357,6 @@ saveView();
 
 saveViewButton.appendChild(link)
 
-
 function saveView(){
 
     var shapes = draw.getAll();
@@ -434,12 +441,27 @@ function applyView(viewObj){
     map.setCenter(VIEW.map.center);
 }
 
+
+
+
 var viewID=location.hash.replace('#','')
 
 if(viewID){
     getView(viewID)
 }
 
+
+var showViewButton = document.getElementById('menu3')
+
+var link = document.createElement('a');
+link.className='click-button';
+link.textContent = 'Show URL';
+
+link.onclick = function (e) {
+alert('Your URL is '+window.location.href)
+}
+
+saveViewButton.appendChild(link)
 
 // https://tc39.github.io/ecma262/#sec-array.prototype.find
 if (!Array.prototype.find) {
