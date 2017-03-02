@@ -2,6 +2,7 @@
 using System.Web.Mvc;
 using System.Web.Routing;
 using System.Configuration;
+using log4net;
 
 namespace proxy
 {
@@ -24,11 +25,12 @@ namespace proxy
                 "{*.}", 
                 new { controller = "Proxy", action = "Proxy"} // Parameter defaults
             );
-
         }
 
         protected void Application_Start()
         {
+
+            log4net.Config.XmlConfigurator.Configure();
 
             AreaRegistration.RegisterAllAreas();
 

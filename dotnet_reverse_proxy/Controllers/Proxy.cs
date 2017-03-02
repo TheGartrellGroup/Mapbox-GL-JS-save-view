@@ -2,13 +2,17 @@
 using System.IO;
 using System.Web.Mvc;
 using System.Net;
+using log4net;
 
 namespace proxy.Controllers
 {
     public class ProxyController : Controller
     {
 
-            protected string svcUrl = proxy.SERVER + ":" + GetPort() ;
+        private static readonly log4net.ILog log =
+        log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+        protected string svcUrl = proxy.SERVER + ":" + GetPort() ;
 
             public ActionResult Proxy()
             {
@@ -23,16 +27,19 @@ namespace proxy.Controllers
                 // Create a request for the URL. 		
                 var req = HttpWebRequest.Create(svcUrl + url);
                 req.Method = HttpContext.Request.HttpMethod;
-
-                //-- No need to copy input stream for GET (actually it would throw an exception)
-                if (req.Method != "GET")
+                log.Debug(req.Method + " " + req);
+            //-- No need to copy input stream for GET (actually it would throw an exception)
+            if (req.Method != "GET")
                 {
+                    
+
                     req.ContentType = "application/json";
 
                     Request.InputStream.Position = 0;  //***** THIS IS REALLY IMPORTANT GOTCHA
 
                     var requestStream = HttpContext.Request.InputStream;
                     Stream webStream = null;
+
                     try
                     {
                         //copy incoming request body to outgoing request
