@@ -29,43 +29,42 @@ namespace proxy.Controllers
                 req.Method = HttpContext.Request.HttpMethod;
                 log.Debug(req.Method + " " + svcUrl + url);
             //-- No need to copy input stream for GET (actually it would throw an exception)
-            if (req.Method != "GET")
-                {
+            if (req.Method != "GET") {
                     
-                    req.ContentType = "application/json";
+                req.ContentType = "application/json";
 
-                    Request.InputStream.Position = 0;  //***** THIS IS REALLY IMPORTANT GOTCHA
+                Request.InputStream.Position = 0;  //***** THIS IS REALLY IMPORTANT GOTCHA
 
-                    var requestStream = HttpContext.Request.InputStream;
-                    Stream webStream = null;
+                var requestStream = HttpContext.Request.InputStream;
+                Stream webStream = null;
 
-                    try
+                try
+                {
+                    //copy incoming request body to outgoing request
+                    if (requestStream != null && requestStream.Length > 0)
                     {
-                        //copy incoming request body to outgoing request
-                        if (requestStream != null && requestStream.Length > 0)
-                        {
-                            req.ContentLength = requestStream.Length;
-                            webStream = req.GetRequestStream();
-                            requestStream.CopyTo(webStream);
-                        }
-                    }
-                    catch(Exception ex){
-                        log.Debug(ex.InnerException);
-                    }
-                    finally
-                    {
-                        if (null != webStream)
-                        {
-                            webStream.Flush();
-                            webStream.Close();
-                        }
+                        req.ContentLength = requestStream.Length;
+                        webStream = req.GetRequestStream();
+                        requestStream.CopyTo(webStream);
                     }
                 }
+                catch(Exception ex){
+                    log.Debug(ex.InnerException);
+                }
+                finally
+                {
+                    if (null != webStream)
+                    {
+                        webStream.Flush();
+                        webStream.Close();
+                    }
+                }
+            }
 
                 // If required by the server, set the credentials.
-                req.Credentials = CredentialCache.DefaultCredentials;
+                req.Credentials = CredentialCache.DefaultNetworkCredentials;
 
-                log.Debug(req.Credentials)
+                //req.Credentials = CredentialCache.DefaultCredentials;
 
                 try{
 
