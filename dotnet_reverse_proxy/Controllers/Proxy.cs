@@ -65,6 +65,8 @@ namespace proxy.Controllers
                 // If required by the server, set the credentials.
                 req.Credentials = CredentialCache.DefaultCredentials;
 
+                log.Debug(req.Credentials)
+
                 try{
 
                     // No more ProtocolViolationException!
