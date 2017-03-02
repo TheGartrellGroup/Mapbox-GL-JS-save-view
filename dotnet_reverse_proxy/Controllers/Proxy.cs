@@ -27,12 +27,11 @@ namespace proxy.Controllers
                 // Create a request for the URL. 		
                 var req = HttpWebRequest.Create(svcUrl + url);
                 req.Method = HttpContext.Request.HttpMethod;
-                log.Debug(req.Method + " " + req);
+                log.Debug(req.Method + " " + svcUrl + url);
             //-- No need to copy input stream for GET (actually it would throw an exception)
             if (req.Method != "GET")
                 {
                     
-
                     req.ContentType = "application/json";
 
                     Request.InputStream.Position = 0;  //***** THIS IS REALLY IMPORTANT GOTCHA
@@ -50,6 +49,9 @@ namespace proxy.Controllers
                             requestStream.CopyTo(webStream);
                         }
                     }
+                    catch(Exception ex){
+                        log.Debug(ex.InnerException);
+                    }
                     finally
                     {
                         if (null != webStream)
@@ -63,23 +65,29 @@ namespace proxy.Controllers
                 // If required by the server, set the credentials.
                 req.Credentials = CredentialCache.DefaultCredentials;
 
-                // No more ProtocolViolationException!
-                using (HttpWebResponse response = (HttpWebResponse)req.GetResponse())
-                {
-                    // Display the status.
-                    //Console.WriteLine(response.StatusDescription);
+                try{
 
-                    // Get the stream containing content returned by the server.
-                    using (Stream dataStream = response.GetResponseStream())
+                    // No more ProtocolViolationException!
+                    using (HttpWebResponse response = (HttpWebResponse)req.GetResponse())
                     {
-                        // Open the stream using a StreamReader for easy access.
-                        StreamReader reader = new StreamReader(dataStream);
-                        // Read the content. 
-                        content = reader.ReadToEnd();
-                    }
-                }
+                        // Display the status.
+                        //Console.WriteLine(response.StatusDescription);
 
-                return content;
+                        // Get the stream containing content returned by the server.
+                        using (Stream dataStream = response.GetResponseStream())
+                        {
+                            // Open the stream using a StreamReader for easy access.
+                            StreamReader reader = new StreamReader(dataStream);
+                            // Read the content. 
+                            content = reader.ReadToEnd();
+                        }
+                    }
+
+                    return content;
+                }catch(Exception ex){
+                    log.Debug(ex.InnerException);
+                    return "{'status':'fail', 'message':'"+ex.InnerException+"'}";
+                }
             }
         
 
