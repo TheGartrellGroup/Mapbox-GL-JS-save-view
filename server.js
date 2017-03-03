@@ -162,7 +162,7 @@ app.use(function(req,res){
 });
 
 app.listen(4005, function () {
-  console.log('Example app listening on port 3000!')
+  console.log('Example app listening on port 4005!')
 })
 
 function _writeViewToJSONFile(jsonobj, cb){
