@@ -100,7 +100,9 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 
 /* write views via post */
 app.post('/view/', function (req, res) {
-  
+
+  	fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
+  	
 	res.header('Content-Type', 'application/javascript');
 
 	//validate object

@@ -16,7 +16,7 @@ namespace proxy.Controllers
 
             public ActionResult Proxy()
             {
-                return Content(grabContent(HttpContext.Request.Url.PathAndQuery.Replace("/"+proxy.APPNAME, "")));
+                return Content(grabContent(HttpContext.Request.Url.PathAndQuery.ToUpper().Replace("/"+proxy.APPNAME.ToUpper(), "")));
             }
 
             /// <see>http://stackoverflow.com/questions/3447589/copying-http-request-inputstream</see>
@@ -32,8 +32,6 @@ namespace proxy.Controllers
             if (req.Method != "GET") {
                     
                 req.ContentType = "application/json";
-
-                Request.InputStream.Position = 0;  //***** THIS IS REALLY IMPORTANT GOTCHA
 
                 var requestStream = HttpContext.Request.InputStream;
                 Stream webStream = null;
@@ -62,9 +60,7 @@ namespace proxy.Controllers
             }
 
                 // If required by the server, set the credentials.
-                req.Credentials = CredentialCache.DefaultNetworkCredentials;
-
-                //req.Credentials = CredentialCache.DefaultCredentials;
+                req.Credentials = CredentialCache.DefaultCredentials;
 
                 try{
 
@@ -86,8 +82,8 @@ namespace proxy.Controllers
 
                     return content;
                 }catch(Exception ex){
-                    log.Debug(ex.InnerException);
-                    return "{'status':'fail', 'message':'"+ex.InnerException+"'}";
+                    log.Debug(ex.Message);
+                    return "{'status':'fail', 'message':'"+ex.Message+"'}";
                 }
             }
         
