@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset='utf-8' />
-    <title></title>
+    <title>Port of Portland - Save View Example</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.css' rel='stylesheet' />
 
@@ -184,108 +184,12 @@ map.on('load', function () {
         "paint": {}
     });
 
-
     if(VIEW && VIEW.shapes){
-
-        map.addSource("markup", {
-            "type": "geojson",
-            "data": VIEW.shapes
-        });
-
-        map.addLayer({
-            "id":"markup",
-            "type": "fill",
-            "source": "markup",
-            "paint": {
-                "fill-color": "#888888",
-                "fill-opacity": 0.7,
-                "fill-outline-color":'#FF0000'
-            },
-            "visibility":'visible'
-        });
+        applyViewShapes()
     }
 
     if(VIEW && VIEW.layers && LayerTree){
-
-        $('.mapboxgl-ctrl.legend-container').on('show', function(){
-
-            var $lyr, newDirOrder = [], newLyrOrder = [];
-
-            VIEW.layers.forEach(function(lyr){
-
-                newLyrOrder.push(lyr.id);
-
-                map.setLayoutProperty(lyr.id, 'visibility', lyr.visibility);
-                if(LayerTree){
-                    if(lyr.groupLayer){
-                            document.getElementById(lyr.groupLayer).children[0].checked = lyr.visibility=='visible';
-                    } else {
-                            document.getElementById(lyr.id).children[0].checked = lyr.visibility=='visible';
-                    }
-                }
-
-                if(!newDirOrder[lyr.directory]){
-                    newDirOrder[lyr.directory] = [];
-                }
-
-                newDirOrder[lyr.directory].push(lyr.id);
-
-            })
-            
-            Object.keys(newDirOrder).reverse().forEach(function(dir){
-                $('#mapboxgl-legend').append($('#'+dir))
-                newDirOrder[dir].reverse().forEach(function(lyr){
-                    $lyr = $('#'+lyr);
-                    $('#'+dir).append($lyr);
-                    
-                })
-            })
-
-            //directory order
-
-            var orderArray = [];
-            var layers = map.getStyle().layers;
-
-            //newDirOrder.reverse();
-            //this loop starts at the directory above the lowest indexed
-            for (var i = newDirOrder.length - 2; i >= 0; i--) {
-                var dir = newDirOrder[i];
-                var layerArray = $('#' + dir).sortable('toArray');
-
-                for (var j = layerArray.length - 1; j >= 0; j--) {
-                    map.moveLayer(layerArray[j]);
-                };
-            }
-
-            // sort layers
-
-
-            var  orderArray =[];
-
-            for (var i =newLyrOrder.length - 1; i >= 0; i--) {
-
-                //findLayerIndex is a method exposed by LayerTree
-                var layerIndex = findLayerIndex(layers, newLyrOrder, i);
-
-                if (layerIndex) {
-                    var obj = {
-                        'originalOrder': layerIndex,
-                        'newOrder': i,
-                        'id': newLyrOrder[i]
-                    }
-                    orderArray.push(obj);
-                }
-            };
-
-            //move layer order
-            orderArray.sort(function(a, b) {
-                if (b.newOrder > a.newOrder) {
-                    map.moveLayer(a.id, b.id);
-                } else {
-                    map.moveLayer(b.id, a.id);
-                }
-            })
-        })
+        applyViewLayers()
     }
 
 });
@@ -340,12 +244,7 @@ var layers =
    
 ];
 
-var draw = new MapboxDraw({
-    displayControlsDefault: false,
-    controls: {
-        polygon: true
-    }
-});
+var draw = new MapboxDraw();
 
 map.addControl(draw);
 
@@ -386,8 +285,6 @@ function saveView(){
             layers.splice(i, 1);
         }
     }
-
-    console.log(layers)
 
     layers = layers.map(function(lyr){
            
@@ -430,7 +327,7 @@ function saveView(){
         }
         location.hash='#'+obj.id;
     };
-        console.log('testin')
+
     oReq.open('POST', 'view/', true);
     oReq.responseType = 'json';
     oReq.setRequestHeader('Content-Type', 'application/json');
@@ -459,6 +356,93 @@ function applyView(viewObj){
     map.setBearing(VIEW.map.bearing);
     map.setPitch(VIEW.map.pitch);
     map.setCenter(VIEW.map.center);
+}
+
+function applyViewShapes(){
+    VIEW.shapes.features.forEach(function(shape){
+        draw.add(shape)
+    })
+}
+
+function applyViewLayers(){
+      $('.mapboxgl-ctrl.legend-container').on('show', function(){
+
+            var $lyr, newDirOrder = [], newLyrOrder = [];
+
+            VIEW.layers.forEach(function(lyr){
+
+                newLyrOrder.push(lyr.id);
+
+                map.setLayoutProperty(lyr.id, 'visibility', lyr.visibility);
+                if(LayerTree){
+                    if(lyr.groupLayer){
+                            document.getElementById(lyr.groupLayer).children[0].checked = lyr.visibility=='visible';
+                    } else {
+                            document.getElementById(lyr.id).children[0].checked = lyr.visibility=='visible';
+                    }
+                }
+
+                if(!newDirOrder[lyr.directory]){
+                    newDirOrder[lyr.directory] = [];
+                }
+
+                newDirOrder[lyr.directory].push(lyr.id);
+
+            })
+            
+            Object.keys(newDirOrder).reverse().forEach(function(dir){
+                $('#mapboxgl-legend').append($('#'+dir))
+                newDirOrder[dir].reverse().forEach(function(lyr){
+                    $lyr = $('#'+lyr);
+                    $('#'+dir).append($lyr);
+                    
+                })
+            })
+
+            //directory order
+
+            var orderArray = [];
+            var layers = map.getStyle().layers;
+
+            //newDirOrder.reverse();
+            //this loop starts at the directory above the lowest indexed
+            for (var i = newDirOrder.length - 2; i >= 0; i--) {
+                var dir = newDirOrder[i];
+                var layerArray = $('#' + dir).sortable('toArray');
+
+                for (var j = layerArray.length - 1; j >= 0; j--) {
+                    map.moveLayer(layerArray[j]);
+                };
+            }
+
+            // sort layers
+
+            var  orderArray =[];
+
+            for (var i =newLyrOrder.length - 1; i >= 0; i--) {
+
+                //findLayerIndex is a method exposed by LayerTree
+                var layerIndex = findLayerIndex(layers, newLyrOrder, i);
+
+                if (layerIndex) {
+                    var obj = {
+                        'originalOrder': layerIndex,
+                        'newOrder': i,
+                        'id': newLyrOrder[i]
+                    }
+                    orderArray.push(obj);
+                }
+            };
+
+            //move layer order
+            orderArray.sort(function(a, b) {
+                if (b.newOrder > a.newOrder) {
+                    map.moveLayer(a.id, b.id);
+                } else {
+                    map.moveLayer(b.id, a.id);
+                }
+            })
+        })
 }
 
 var viewID=location.hash.replace('#','')
