@@ -96,6 +96,12 @@ var layerSchema  = {
 		},
 		"directory":{
 			"type":"string"
+		},
+		"directoryOpen":{
+			"type":"boolean"
+		},
+		"groupLayer":{
+			"type":"string"
 		}
 	}
 }
@@ -111,7 +117,6 @@ var mapStateSchema = {
 	"additionalProperties": false
 }
 ```
-
 
 # Usage
 
