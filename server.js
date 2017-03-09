@@ -72,6 +72,15 @@ var layerSchema  = {
 		},
 		"directory":{
 			"type":"string"
+		},
+		"directoryOpen":{
+			"type":"boolean"
+		},
+		"layerGroup":{
+			"type":"array"
+		},
+		"icon":{
+			"type":"string"
 		}
 	}
 }

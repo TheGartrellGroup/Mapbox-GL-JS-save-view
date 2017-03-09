@@ -7,9 +7,8 @@
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.css' rel='stylesheet' />
 
   <link href='https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css' rel='stylesheet' />
-    <link rel='stylesheet' href='https://cdn.rawgit.com/TheGartrellGroup/Mapbox-GL-JS-Layer-Tree/1acbd047/dist/css/styles.min.css'/> 
+    <link rel='stylesheet' href='https://cdn.rawgit.com/TheGartrellGroup/Mapbox-GL-JS-Layer-Tree/master/dist/css/styles.min.css'/> 
     <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.16.0/mapbox-gl-draw.css' type='text/css'/>
-
 
     <style>
         body { margin:0; padding:0; }
@@ -73,11 +72,12 @@
         .click-button{
             cursor:pointer;
         }
+
+
     </style>
 </head>
 <body>
 
-<nav id="menu"></nav>
 <nav id="menu2"></nav>
 <div id="map"></div>
   <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.js'></script>
@@ -104,7 +104,7 @@ map.on('load', function () {
         "type": "fill",
         "source": "land",
         "layout": {
-            "visibility": 'visible'
+            "visibility": 'none'
         },
         "paint": {
             'fill-color': '#a89b97',
@@ -118,7 +118,7 @@ map.on('load', function () {
         "type": "fill",
         "source": "state-boundaries",
         "layout": {
-            "visibility": 'visible'
+            "visibility": 'none'
         },
         "paint": {
             'fill-color': '#CEE5C2',
@@ -133,7 +133,7 @@ map.on('load', function () {
         "type": "circle",
         "source": "elevation",
         "layout": {
-            "visibility": 'visible'
+            "visibility": 'none'
         },
         "paint": {
             'circle-color': '#eae00b',
@@ -145,30 +145,29 @@ map.on('load', function () {
 
     map.addSource('railroads', { 'type': 'geojson', 'data': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_railroads_north_america.geojson'});
     map.addLayer({
+        "id": "railroads2",
+        "type": "line",
+        "source": "railroads",
+        "layout": {
+            'visibility': 'none'
+        },
+        "paint": {
+            "line-color": "#FFCC00",
+            "line-width": 3
+        }
+    });
+
+    map.addLayer({
         "id": "railroads",
         "type": "line",
         "source": "railroads",
         "layout": {
-            'visibility': 'visible'
+            'visibility': 'none'
         },
         "paint": {
             "line-color": "#c7515f",
             "line-width": 3,
             "line-dasharray": [4,4],
-        }
-    });
-
-    map.addLayer({
-        "id": "railroads2",
-        "type": "line",
-        "source": "railroads",
-        "layout": {
-            'visibility': 'visible'
-        },
-        "paint": {
-            "line-color": "#FFCC00",
-            "line-width": 3,
-            "line-dasharray": [1,1],
         }
     });
 
@@ -178,7 +177,7 @@ map.on('load', function () {
         "type": "symbol",
         "source": "airports",
         "layout": {
-            "visibility": 'visible',
+            "visibility": 'none',
             'icon-image': 'airport-11'
 
         },
@@ -216,10 +215,12 @@ map.on('load', function () {
 
                 newLyrOrder.push(lyr.id);
 
-                if(lyr.visibility=='none'){
-                    map.setLayoutProperty(lyr.id, 'visibility', lyr.visibility);
-                    if(LayerTree){
-                        document.getElementById(lyr.id).children[0].checked = false;
+                map.setLayoutProperty(lyr.id, 'visibility', lyr.visibility);
+                if(LayerTree){
+                    if(lyr.groupLayer){
+                            document.getElementById(lyr.groupLayer).children[0].checked = lyr.visibility=='visible';
+                    } else {
+                            document.getElementById(lyr.id).children[0].checked = lyr.visibility=='visible';
                     }
                 }
 
@@ -236,12 +237,11 @@ map.on('load', function () {
                 newDirOrder[dir].reverse().forEach(function(lyr){
                     $lyr = $('#'+lyr);
                     $('#'+dir).append($lyr);
-                    console.log({'dir':dir, "lyr":lyr})
+                    
                 })
-                
             })
 
-            //directopry order
+            //directory order
 
             var orderArray = [];
             var layers = map.getStyle().layers;
@@ -292,23 +292,37 @@ map.on('load', function () {
 
 var layers =
 [
+   
     {
-        'name': 'Land',
-        'id': 'land',
-        'source': 'land',
+        'name': 'Group',
         'directory': 'Misc',
-    },
-    {
-        'name': 'State Boundaries',
-        'id': 'state-boundaries',
-        'source': "state-boundaries",
-        'directory': 'Misc',
+        'id': 'foo',
+        'icon': 'https://cdn1.iconfinder.com/data/icons/significon/512/Significon-Multiple-512.png',
+        'layerGroup' : [
+            {
+                'id': 'state-boundaries',
+                'source': 'state-boundaries',
+                'name': 'State Bounds'
+            },
+            {
+                'id': 'land',
+                'source': 'land',
+                'name': 'Land',
+                'icon': 'https://static.typingclub.com/m/tpmedia/img/replay-icon.png'
+            }           
+        ]
     },
     {
         'name': 'Elevated Points',
         'id': 'elevation-points',
         'source': 'elevation',
-        'directory': 'Misc',
+        'directory': 'Misc'
+    },
+    {
+        'name': 'Railroads 2',
+        'id': 'railroads2',
+        'source': 'railroads',
+        'directory': 'Transportation2',
     },
     {
         'name': 'Railroads',
@@ -322,14 +336,8 @@ var layers =
         'source': 'airports',
         'directory': 'Transportation',
         'icon': 'icons/airplane.svg'
-    },
-    {
-        'name': 'Railroads 2',
-        'id': 'railroads2',
-        'source': 'railroads',
-        'directory': 'Transportation2',
     }
-
+   
 ];
 
 var draw = new MapboxDraw({
@@ -364,6 +372,7 @@ function saveView(){
     var layers = map.getStyle().layers.filter(function(lyr){return (lyr.source && lyr.source !== 'composite' && lyr.source.indexOf('mapbox-gl-draw')==-1)})
 
     for(var i=layers.length-1;i>-1;i--){
+
         if(layers[i].source =='markup'){
 
             var data = map.getSource('markup')._data;
@@ -378,12 +387,22 @@ function saveView(){
         }
     }
 
-    layers = layers.map(function(lyr){return {'id':lyr.id, 'visibility':(map.getLayoutProperty(lyr.id,"visibility") || 'visible')}})
+    console.log(layers)
 
+    layers = layers.map(function(lyr){
+           
+        var layerObj = {'id':lyr.id, 'visibility':(map.getLayoutProperty(lyr.id,"visibility") || 'visible'), 'directory':$('#'+lyr.id).parent().attr('id'), directoryOpen : $('#'+lyr.id).is(':visible')}
 
-    layers.forEach(function(lyr){
-        lyr.directory = $('#'+lyr.id).parent().attr('id');
+        if($('#'+lyr.id).parent().attr('childlayers')){
+            layerObj.groupLayer = $('#'+lyr.id).parent().attr('id');
+            delete layerObj.directory;
+            delete layerObj.directoryOpen;
+        }
+
+        return layerObj
     })
+
+    //layers.reverse();
 
     var obj = {
         map:{
@@ -399,6 +418,8 @@ function saveView(){
         obj.shapes = shapes;
     }
 
+    console.log(obj)
+
     var oReq = new XMLHttpRequest();
 
     oReq.onload = function (e) {
@@ -409,7 +430,7 @@ function saveView(){
         }
         location.hash='#'+obj.id;
     };
-
+        console.log('testin')
     oReq.open('POST', 'view/', true);
     oReq.responseType = 'json';
     oReq.setRequestHeader('Content-Type', 'application/json');
@@ -434,22 +455,17 @@ function getView(viewID){
 }
 
 function applyView(viewObj){
-
     map.setZoom(VIEW.map.zoom);
     map.setBearing(VIEW.map.bearing);
     map.setPitch(VIEW.map.pitch);
     map.setCenter(VIEW.map.center);
 }
 
-
-
-
 var viewID=location.hash.replace('#','')
 
 if(viewID){
     getView(viewID)
 }
-
 
 var showViewButton = document.getElementById('menu3')
 
