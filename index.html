@@ -314,8 +314,6 @@ function saveView(){
         obj.shapes = shapes;
     }
 
-    console.log(obj)
-
     var oReq = new XMLHttpRequest();
 
     oReq.onload = function (e) {
@@ -327,7 +325,13 @@ function saveView(){
         location.hash='#'+obj.id;
     };
 
-    oReq.open('POST', 'view/', true);
+    var url = 'view/';  
+    
+    if(location.pathname.substr(-1) !=='/'){
+        window.history.pushState("object or string", "Title", location.pathname+'/');
+    }
+
+    oReq.open('POST', url, true);
     oReq.responseType = 'json';
     oReq.setRequestHeader('Content-Type', 'application/json');
 
