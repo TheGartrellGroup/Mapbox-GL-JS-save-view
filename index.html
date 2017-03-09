@@ -263,7 +263,7 @@ saveView();
 
 saveViewButton.appendChild(link)
 
-function saveView(){
+function saveView(cb){
 
     var shapes = draw.getAll();
 
@@ -323,6 +323,10 @@ function saveView(){
             obj = JSON.parse(obj)
         }
         location.hash='#'+obj.id;
+
+        if(cb){
+            cb(obj.id);
+        }
     };
 
     var url = 'view/';  
@@ -458,10 +462,43 @@ var showViewButton = document.getElementById('menu3')
 
 var link = document.createElement('a');
 link.className='click-button';
-link.textContent = 'Show URL';
+link.textContent = 'Share View';
 
 link.onclick = function (e) {
-alert('Your URL is '+window.location.href)
+
+    function share(id){
+
+        var x = prompt('Please enter an email address to share this view:')
+
+        if(x){
+
+            var obj = {'id':id, 'recpt':x};
+
+            var oReq = new XMLHttpRequest();
+
+            oReq.onload = function (e) {
+               alert('your view has been shared')
+            };
+            
+            if(location.pathname.substr(-1) !=='/'){
+                window.history.pushState("object or string", "Title", location.pathname+'/');
+            }
+
+            oReq.open('POST', 'share/', true);
+            oReq.responseType = 'json';
+            oReq.setRequestHeader('Content-Type', 'application/json');
+
+            oReq.send(JSON.stringify(obj));
+        }
+    }
+
+    //do we have a view hash?
+    if(!location.hash){
+        saveView(share) 
+    } else {
+        share(location.hash.replace('#',''))
+    }
+    
 }
 
 saveViewButton.appendChild(link)

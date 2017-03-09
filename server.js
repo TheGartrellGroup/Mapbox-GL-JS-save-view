@@ -2,7 +2,7 @@
 /* Deps */
 var express = require('express'),
 jsonfile = require('jsonfile'),
-//
+nodemailer = require('nodemailer'),
 uuid = require('node-uuid'),
 Validator = require('jsonschema').Validator,
 bodyParser = require('body-parser')
@@ -158,6 +158,49 @@ app.get('/view/:id*?', function (req, res) {
 	});
 	
 });
+
+app.post('/share/', function (req, res){
+
+	var sender = '', //your (gmail) email address here;
+		pass = ''; //your password
+
+	// Todo - scrub the contents of the message..
+	//client/server side validation of email address
+	var smtpConfig = {
+        host: 'smtp.gmail.com',
+        port: 587,
+        requiresAuth: true, // use SSL
+        domains: ["gmail.com", "googlemail.com"],
+        auth: {
+            user: sender,
+            pass: pass
+        }
+    };
+
+    var transporter = nodemailer.createTransport(smtpConfig);
+
+    var appLink = req.get('referer').replace('share/','')+'#'+req.body.id
+
+    var mailOptions = {
+        from: sender, // sender address
+        to: req.body.recpt, // list of receivers
+        subject: 'Website link', // Subject line
+        text: "Check out this web map! " + '\r\n\r\n'+appLink // plaintext body
+    };
+
+    // send mail with defined transport object
+    transporter.sendMail(mailOptions, function(error, info){
+    	res.writeHead(200, {
+			'Content-type' : 'application/javascript'
+		});
+
+        if(error){
+        	return res.status(200).end('{"status" : "failure", "message":"'+error+'" }');
+        } else {
+			return res.status(200).end('{"status" :"success", "msg":"View shared with '+req.body.recpt+'", "id":"'+req.body.id+'"}');
+		}
+    });
+})
 
 app.get('/:id*?', function(req, res){
 

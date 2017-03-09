@@ -16,15 +16,19 @@ namespace proxy.Controllers
 
         public ActionResult Proxy()
         {
-            return Content(grabContent(HttpContext.Request.Url.PathAndQuery.ToUpper().Replace("/"+proxy.APPNAME.ToUpper(), "")));
+            var path = HttpContext.Request.Url.PathAndQuery;
+            return Content(grabContent(path.ToUpper().Replace("/"+proxy.APPNAME.ToUpper(), ""), HttpContext.Request.Url.Scheme +"://"+ HttpContext.Request.Url.Host+path));
         }
 
         /// <see>http://stackoverflow.com/questions/3447589/copying-http-request-inputstream</see>
-        private string grabContent(string url) {
+        private string grabContent(string url, string path) {
+
             string content;
 
             // Create a request for the URL. 		
-            var req = HttpWebRequest.Create(svcUrl + url);
+            var req = (HttpWebRequest)HttpWebRequest.Create(svcUrl + url);
+
+            req.Referer= path;
             req.Method = HttpContext.Request.HttpMethod;
             log.Debug(req.Method + " " + svcUrl + url);
             //-- No need to copy input stream for GET (actually it would throw an exception)
@@ -57,6 +61,8 @@ namespace proxy.Controllers
                     }
                 }
             }
+
+            
 
             // If required by the server, set the credentials.
             req.Credentials = CredentialCache.DefaultCredentials;
