@@ -76,8 +76,8 @@ var layerSchema  = {
 		"directoryOpen":{
 			"type":"boolean"
 		},
-		"layerGroup":{
-			"type":"array"
+		"groupLayer":{
+			"type":"string"
 		},
 		"icon":{
 			"type":"string"

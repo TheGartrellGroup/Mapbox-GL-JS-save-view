@@ -3,7 +3,6 @@ var request = require('supertest'),
 
 describe('GET app', function () {
   
-
 /*
 _  _ _ ____ _ _ _    ___  ____ ____ ___ 
 |  | | |___ | | |    |__] |  | [__   |  
@@ -74,8 +73,35 @@ _  _ _ ____ _ _ _    ___  ____ ____ ___
       });
   });
 
+    var mapStateBad2 = {
+      "map":{
+          "center": [-123.543667, 43.76544],
+          "zoom": 2.456,
+          "bearing" : -21.5,
+          "pitch": 15
+      },
+      "layers": [{
+          "id": "state-boundaries",
+          "visibility": "none",
+          "paint": {},
+          "filter": {}
+      }],
+      "garbage":"12321343245"
+  }
 
- var mapStateGood = {
+  it('400 JSON error if I post extra props in object to view', function (done) {
+    request(app)
+      .post('/view/')
+      .send(mapStateBad2)
+      .expect('Content-Type', /javascript/)
+      .expect(400)
+      .end(function(err, res){
+        console.log(res.error.text)
+        done()
+      });
+  });
+
+  var mapStateGood = {
       "map":{
           "center": [-123.543667, 43.76544],
           "zoom": 12,
@@ -86,21 +112,23 @@ _  _ _ ____ _ _ _    ___  ____ ____ ___
           "id": "state-boundaries",
           "visibility": "none",
           "paint": {},
-          "filter": {}
+          "filter": {},
+          "directory":"MyGroup",
+          "groupLayer":'Yay'
       }]
   }
 
-    it('should 200 when posting valid mapState object', function (done) {
-    request(app)
-      .post('/view/')
-      .send(mapStateGood)
-      .expect('Content-Type', /javascript/)
-      .expect(400)
-      .end(function(err, res){
-        console.log(res.text)
-        done()
-      });
+  it('should 200 when posting valid mapState object', function (done) {
+  request(app)
+    .post('/view/')
+    .send(mapStateGood)
+    .expect('Content-Type', /javascript/)
+    .expect(400)
+    .end(function(err, res){
+      console.log(res.text)
+      done()
     });
+  });
 
 
 /*
