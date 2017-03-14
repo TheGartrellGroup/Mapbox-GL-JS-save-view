@@ -79,6 +79,7 @@
 <body>
 
 <nav id="menu2"></nav>
+<!-- <nav id="menu3"></nav> -->
 <div id="map"></div>
   <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.js'></script>
   <script src='https://rawgit.com/TheGartrellGroup/Mapbox-GL-JS-Layer-Tree/master/dist/js/scripts.min.js'></script>
@@ -331,9 +332,9 @@ function saveView(cb){
 
     var url = 'view/';  
     
-    if(location.pathname.substr(-1) !=='/'){
-        window.history.pushState("object or string", "Title", location.pathname+'/');
-    }
+    // if(location.pathname.substr(-1) !=='/'){
+    //     window.history.pushState("object or string", "Title", location.pathname+'/');
+    // }
 
     oReq.open('POST', url, true);
     oReq.responseType = 'json';
@@ -366,90 +367,92 @@ function applyView(viewObj){
 }
 
 function applyViewShapes(){
+	var i = 1;
     VIEW.shapes.features.forEach(function(shape){
-        draw.add(shape)
+        setTimeout(function(){draw.add(shape)},i*1);
+        i++
     })
 }
 
 function applyViewLayers(){
-      $('.mapboxgl-ctrl.legend-container').on('show', function(){
+    $('.mapboxgl-ctrl.legend-container').on('show', function(){
 
-            var $lyr, newDirOrder = [], newLyrOrder = [];
+        var $lyr, newDirOrder = [], newLyrOrder = [];
 
-            VIEW.layers.forEach(function(lyr){
+        VIEW.layers.forEach(function(lyr){
 
-                newLyrOrder.push(lyr.id);
+            newLyrOrder.push(lyr.id);
 
-                map.setLayoutProperty(lyr.id, 'visibility', lyr.visibility);
-                if(LayerTree){
-                    if(lyr.groupLayer){
-                            document.getElementById(lyr.groupLayer).children[0].checked = lyr.visibility=='visible';
-                    } else {
-                            document.getElementById(lyr.id).children[0].checked = lyr.visibility=='visible';
-                    }
+            map.setLayoutProperty(lyr.id, 'visibility', lyr.visibility);
+            if(LayerTree){
+                if(lyr.groupLayer){
+                        document.getElementById(lyr.groupLayer).children[0].checked = lyr.visibility=='visible';
+                } else {
+                        document.getElementById(lyr.id).children[0].checked = lyr.visibility=='visible';
                 }
-
-                if(!newDirOrder[lyr.directory]){
-                    newDirOrder[lyr.directory] = [];
-                }
-
-                newDirOrder[lyr.directory].push(lyr.id);
-
-            })
-            
-            Object.keys(newDirOrder).reverse().forEach(function(dir){
-                $('#mapboxgl-legend').append($('#'+dir))
-                newDirOrder[dir].reverse().forEach(function(lyr){
-                    $lyr = $('#'+lyr);
-                    $('#'+dir).append($lyr);
-                    
-                })
-            })
-
-            //directory order
-
-            var orderArray = [];
-            var layers = map.getStyle().layers;
-
-            //newDirOrder.reverse();
-            //this loop starts at the directory above the lowest indexed
-            for (var i = newDirOrder.length - 2; i >= 0; i--) {
-                var dir = newDirOrder[i];
-                var layerArray = $('#' + dir).sortable('toArray');
-
-                for (var j = layerArray.length - 1; j >= 0; j--) {
-                    map.moveLayer(layerArray[j]);
-                };
             }
 
-            // sort layers
+            if(!newDirOrder[lyr.directory]){
+                newDirOrder[lyr.directory] = [];
+            }
 
-            var  orderArray =[];
+            newDirOrder[lyr.directory].push(lyr.id);
 
-            for (var i =newLyrOrder.length - 1; i >= 0; i--) {
-
-                //findLayerIndex is a method exposed by LayerTree
-                var layerIndex = findLayerIndex(layers, newLyrOrder, i);
-
-                if (layerIndex) {
-                    var obj = {
-                        'originalOrder': layerIndex,
-                        'newOrder': i,
-                        'id': newLyrOrder[i]
-                    }
-                    orderArray.push(obj);
-                }
-            };
-
-            //move layer order
-            orderArray.sort(function(a, b) {
-                if (b.newOrder > a.newOrder) {
-                    map.moveLayer(a.id, b.id);
-                } else {
-                    map.moveLayer(b.id, a.id);
-                }
+        })
+        
+        Object.keys(newDirOrder).reverse().forEach(function(dir){
+            $('#mapboxgl-legend').append($('#'+dir))
+            newDirOrder[dir].reverse().forEach(function(lyr){
+                $lyr = $('#'+lyr);
+                $('#'+dir).append($lyr);
+                
             })
         })
+
+        //directory order
+
+        var orderArray = [];
+        var layers = map.getStyle().layers;
+
+        //newDirOrder.reverse();
+        //this loop starts at the directory above the lowest indexed
+        for (var i = newDirOrder.length - 2; i >= 0; i--) {
+            var dir = newDirOrder[i];
+            var layerArray = $('#' + dir).sortable('toArray');
+
+            for (var j = layerArray.length - 1; j >= 0; j--) {
+                map.moveLayer(layerArray[j]);
+            };
+        }
+
+        // sort layers
+
+        var  orderArray =[];
+
+        for (var i =newLyrOrder.length - 1; i >= 0; i--) {
+
+            //findLayerIndex is a method exposed by LayerTree
+            var layerIndex = findLayerIndex(layers, newLyrOrder, i);
+
+            if (layerIndex) {
+                var obj = {
+                    'originalOrder': layerIndex,
+                    'newOrder': i,
+                    'id': newLyrOrder[i]
+                }
+                orderArray.push(obj);
+            }
+        };
+
+        //move layer order
+        orderArray.sort(function(a, b) {
+            if (b.newOrder > a.newOrder) {
+                map.moveLayer(a.id, b.id);
+            } else {
+                map.moveLayer(b.id, a.id);
+            }
+        })
+    })
 }
 
 var viewID=location.hash.replace('#','')
@@ -458,48 +461,48 @@ if(viewID){
     getView(viewID)
 }
 
-var showViewButton = document.getElementById('menu3')
+// var showViewButton = document.getElementById('menu3')
 
-var link = document.createElement('a');
-link.className='click-button';
-link.textContent = 'Share View';
+// var link = document.createElement('a');
+// link.className='click-button';
+// link.textContent = 'Share View';
 
-link.onclick = function (e) {
+// link.onclick = function (e) {
 
-    function share(id){
+//     function share(id){
 
-        var x = prompt('Please enter an email address to share this view:')
+//         var x = prompt('Please enter an email address to share this view:')
 
-        if(x){
+//         if(x){
 
-            var obj = {'id':id, 'recpt':x};
+//             var obj = {'id':id, 'recpt':x};
 
-            var oReq = new XMLHttpRequest();
+//             var oReq = new XMLHttpRequest();
 
-            oReq.onload = function (e) {
-               alert('your view has been shared')
-            };
+//             oReq.onload = function (e) {
+//                alert('your view has been shared')
+//             };
             
-            if(location.pathname.substr(-1) !=='/'){
-                window.history.pushState("object or string", "Title", location.pathname+'/');
-            }
+//             if(location.pathname.substr(-1) !=='/'){
+//                 window.history.pushState("object or string", "Title", location.pathname+'/');
+//             }
 
-            oReq.open('POST', 'share/', true);
-            oReq.responseType = 'json';
-            oReq.setRequestHeader('Content-Type', 'application/json');
+//             oReq.open('POST', 'share/', true);
+//             oReq.responseType = 'json';
+//             oReq.setRequestHeader('Content-Type', 'application/json');
 
-            oReq.send(JSON.stringify(obj));
-        }
-    }
+//             oReq.send(JSON.stringify(obj));
+//         }
+//     }
 
-    //do we have a view hash?
-    if(!location.hash){
-        saveView(share) 
-    } else {
-        share(location.hash.replace('#',''))
-    }
+//     //do we have a view hash?
+//     if(!location.hash){
+//         saveView(share) 
+//     } else {
+//         share(location.hash.replace('#',''))
+//     }
     
-}
+// }
 
 saveViewButton.appendChild(link)
 
