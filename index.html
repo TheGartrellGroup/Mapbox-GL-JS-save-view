@@ -128,21 +128,21 @@ map.on('load', function () {
         }
     });
 
-    // map.addSource('elevation', { type: 'geojson', data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_geography_regions_elevation_points.geojson' });
-    // map.addLayer({
-    //     "id": "elevation-points",
-    //     "type": "circle",
-    //     "source": "elevation",
-    //     "layout": {
-    //         "visibility": 'none'
-    //     },
-    //     "paint": {
-    //         'circle-color': '#eae00b',
-    //         'circle-opacity': 0.8,
-    //         'circle-stroke-color': '#2b2424',
-    //         'circle-stroke-width': 1
-    //     }
-    // });
+    map.addSource('elevation', { type: 'geojson', data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_geography_regions_elevation_points.geojson' });
+    map.addLayer({
+        "id": "elevation-points",
+        "type": "circle",
+        "source": "elevation",
+        "layout": {
+            "visibility": 'none'
+        },
+        "paint": {
+            'circle-color': '#eae00b',
+            'circle-opacity': 0.8,
+            'circle-stroke-color': '#2b2424',
+            'circle-stroke-width': 1
+        }
+    });
 
     map.addSource('railroads', { 'type': 'geojson', 'data': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_railroads_north_america.geojson'});
     map.addLayer({
@@ -197,7 +197,6 @@ map.on('load', function () {
 
 var layers =
 [
-   
     {
         'name': 'Group',
         'directory': 'Misc',
@@ -216,12 +215,12 @@ var layers =
             }           
         ]
     },
-    // {
-    //     'name': 'Elevated Points',
-    //     'id': 'elevation-points',
-    //     'source': 'elevation',
-    //     'directory': 'Misc'
-    // },
+    {
+        'name': 'Elevated Points',
+        'id': 'elevation-points',
+        'source': 'elevation',
+        'directory': 'Misc'
+    },
     {
         'name': 'Railroads 2',
         'id': 'railroads2',
