@@ -128,21 +128,21 @@ map.on('load', function () {
         }
     });
 
-    map.addSource('elevation', { type: 'geojson', data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_geography_regions_elevation_points.geojson' });
-    map.addLayer({
-        "id": "elevation-points",
-        "type": "circle",
-        "source": "elevation",
-        "layout": {
-            "visibility": 'none'
-        },
-        "paint": {
-            'circle-color': '#eae00b',
-            'circle-opacity': 0.8,
-            'circle-stroke-color': '#2b2424',
-            'circle-stroke-width': 1
-        }
-    });
+    // map.addSource('elevation', { type: 'geojson', data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_geography_regions_elevation_points.geojson' });
+    // map.addLayer({
+    //     "id": "elevation-points",
+    //     "type": "circle",
+    //     "source": "elevation",
+    //     "layout": {
+    //         "visibility": 'none'
+    //     },
+    //     "paint": {
+    //         'circle-color': '#eae00b',
+    //         'circle-opacity': 0.8,
+    //         'circle-stroke-color': '#2b2424',
+    //         'circle-stroke-width': 1
+    //     }
+    // });
 
     map.addSource('railroads', { 'type': 'geojson', 'data': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_railroads_north_america.geojson'});
     map.addLayer({
@@ -216,12 +216,12 @@ var layers =
             }           
         ]
     },
-    {
-        'name': 'Elevated Points',
-        'id': 'elevation-points',
-        'source': 'elevation',
-        'directory': 'Misc'
-    },
+    // {
+    //     'name': 'Elevated Points',
+    //     'id': 'elevation-points',
+    //     'source': 'elevation',
+    //     'directory': 'Misc'
+    // },
     {
         'name': 'Railroads 2',
         'id': 'railroads2',
@@ -287,16 +287,28 @@ function saveView(cb){
     }
 
     layers = layers.map(function(lyr){
-           
-        var layerObj = {'id':lyr.id, 'visibility':(map.getLayoutProperty(lyr.id,"visibility") || 'visible'), 'directory':$('#'+lyr.id).parent().attr('id'), directoryOpen : $('#'+lyr.id).is(':visible')}
+
+        var $directory = $('#' + lyr.id).parent();
+
+        if(!$directory.hasClass('layer-directory')){
+        	$directory = $directory.parent();
+        }
+
+		var layerObj = {
+			'id': lyr.id,
+			'visibility': (map.getLayoutProperty(lyr.id, "visibility") || 'visible'),
+			'directory': $directory.attr('id'),
+			'directoryOpen': $('#' + lyr.id).is(':visible')
+		}
 
         if($('#'+lyr.id).parent().attr('childlayers')){
             layerObj.groupLayer = $('#'+lyr.id).parent().attr('id');
-            delete layerObj.directory;
-            delete layerObj.directoryOpen;
+            //delete layerObj.directory;
+            //delete layerObj.directoryOpen;
         }
 
-        return layerObj
+        return layerObj;
+
     })
 
     //layers.reverse();
@@ -387,7 +399,7 @@ function applyViewLayers(){
             if(LayerTree){
                 if(lyr.groupLayer){
                         document.getElementById(lyr.groupLayer).children[0].checked = lyr.visibility=='visible';
-                } else {
+                } else if(document.getElementById(lyr.id)){
                         document.getElementById(lyr.id).children[0].checked = lyr.visibility=='visible';
                 }
             }
