@@ -1,566 +1,715 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset='utf-8' />
     <title>Port of Portland - Save View Example</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
     <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.css' rel='stylesheet' />
-
-  <link href='https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css' rel='stylesheet' />
-    <link rel='stylesheet' href='https://cdn.rawgit.com/TheGartrellGroup/Mapbox-GL-JS-Layer-Tree/master/dist/css/styles.min.css'/> 
-    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.16.0/mapbox-gl-draw.css' type='text/css'/>
-
+    <link href='https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css' rel='stylesheet' />
+    <link rel='stylesheet' href='https://cdn.rawgit.com/TheGartrellGroup/Mapbox-GL-JS-Layer-Tree/master/dist/css/styles.min.css' />
+    <link rel='stylesheet' href='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.16.0/mapbox-gl-draw.css' type='text/css' />
     <style>
-        body { margin:0; padding:0; }
-        #map { position:absolute; top:0; bottom:0; width:100%; }
+    body {
+        margin: 0;
+        padding: 0;
+    }
     
-        #menu, #menu2, #menu3 {
-            background: #fff;
-            position: absolute;
-            z-index: 1;
-          
-            border-radius: 3px;
-            width: 120px;
-            border: 1px solid rgba(0,0,0,0.4);
-            font-family: 'Open Sans', sans-serif;
-        }
-
-        #menu {
-              top: 50px;
-            right: 10px;
-        }
-
-        #menu2{
-              bottom: 30px;
-            right: 10px;
-        }
-
-        #menu3{
-            bottom: 70px;
-            right: 10px;
-        }
-
-        #menu a, #menu2 a, #menu3 a {
-            font-size: 13px;
-            color: #404040;
-            display: block;
-            margin: 0;
-            padding: 0;
-            padding: 10px;
-            text-decoration: none;
-            border-bottom: 1px solid rgba(0,0,0,0.25);
-            text-align: center;
-        }
-
-        #menu a:last-child, #menu2 a:last-child, #menu3 a:last-child {
-            border: none;
-        }
-
-        #menu a:hover, #menu2 a:hover, #menu3 a:hover {
-            background-color: #f8f8f8;
-            color: #404040;
-        }
-
-        #menu a.active, #menu2 a.active, #menu3 a:active {
-            background-color: #3887be;
-            color: #ffffff;
-        }
-
-        #menu a.active:hover, #menu2 a.active:hover, #menu3 a.active:hover {
-            background: #3074a4;
-        }
-        .click-button{
-            cursor:pointer;
-        }
-
-
+    #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+    }
+    
+    #menu,
+    #menu2,
+    #menu3 {
+        background: #fff;
+        position: absolute;
+        z-index: 1;
+        border-radius: 3px;
+        width: 120px;
+        border: 1px solid rgba(0, 0, 0, 0.4);
+        font-family: 'Open Sans', sans-serif;
+    }
+    
+    #menu {
+        top: 50px;
+        right: 10px;
+    }
+    
+    #menu2 {
+        bottom: 30px;
+        right: 10px;
+    }
+    
+    #menu3 {
+        bottom: 70px;
+        right: 10px;
+    }
+    
+    #menu a,
+    #menu2 a,
+    #menu3 a {
+        font-size: 13px;
+        color: #404040;
+        display: block;
+        margin: 0;
+        padding: 0;
+        padding: 10px;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+        text-align: center;
+    }
+    
+    #menu a:last-child,
+    #menu2 a:last-child,
+    #menu3 a:last-child {
+        border: none;
+    }
+    
+    #menu a:hover,
+    #menu2 a:hover,
+    #menu3 a:hover {
+        background-color: #f8f8f8;
+        color: #404040;
+    }
+    
+    #menu a.active,
+    #menu2 a.active,
+    #menu3 a:active {
+        background-color: #3887be;
+        color: #ffffff;
+    }
+    
+    #menu a.active:hover,
+    #menu2 a.active:hover,
+    #menu3 a.active:hover {
+        background: #3074a4;
+    }
+    
+    .click-button {
+        cursor: pointer;
+    }
     </style>
 </head>
+
 <body>
+    <nav id="menu2"></nav>
+    <!-- <nav id="menu3"></nav> -->
+    <div id="map"></div>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.js'></script>
+    <script src='https://cdn.rawgit.com/TheGartrellGroup/Mapbox-GL-JS-Layer-Tree/master/dist/js/scripts.min.js'></script>
+    <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.16.0/mapbox-gl-draw.js'></script>
+    <script>
+    mapboxgl.accessToken = '';
 
-<nav id="menu2"></nav>
-<!-- <nav id="menu3"></nav> -->
-<div id="map"></div>
-  <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.js'></script>
-  <script src='https://rawgit.com/TheGartrellGroup/Mapbox-GL-JS-Layer-Tree/master/dist/js/scripts.min.js'></script>
-   <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.16.0/mapbox-gl-draw.js'></script>
-<script>
+    var VIEW;
 
-mapboxgl.accessToken = 'pk.eyJ1IjoiYnJ5Y2VnYXJ0cmVsbCIsImEiOiJhWkYwRGQ0In0.-LsFFcDkzDELHt4E2BOrsQ';
-
-var VIEW;
-
-var map = new mapboxgl.Map({
-    container: 'map',
-    style: 'mapbox://styles/mapbox/streets-v9',
-    center: [-95.9980, 41.2524],
-    zoom: 4
-});
-
-map.on('load', function () {
-
-    map.addSource('land', { type: 'geojson', data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_land.geojson' });
-    map.addLayer({
-        "id": "land",
-        "type": "fill",
-        "source": "land",
-        "layout": {
-            "visibility": 'none'
-        },
-        "paint": {
-            'fill-color': '#a89b97',
-            'fill-opacity': 0.8
-        }
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/streets-v9',
+        center: [-95.9980, 41.2524],
+        zoom: 4
     });
 
-    map.addSource('state-boundaries', { type: 'geojson', data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_1_states_provinces_shp.geojson' });
-    map.addLayer({
-        "id": "state-boundaries",
-        "type": "fill",
-        "source": "state-boundaries",
-        "layout": {
-            "visibility": 'none'
-        },
-        "paint": {
-            'fill-color': '#CEE5C2',
-            'fill-opacity': 0.8,
-            'fill-outline-color': '#2b2424'
-        }
-    });
+    var emptyGJ = {
+        'type': 'FeatureCollection',
+        'features': []
+    };
 
-    map.addSource('elevation', { type: 'geojson', data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_geography_regions_elevation_points.geojson' });
-    map.addLayer({
-        "id": "elevation-points",
-        "type": "circle",
-        "source": "elevation",
-        "layout": {
-            "visibility": 'none'
-        },
-        "paint": {
-            'circle-color': '#eae00b',
-            'circle-opacity': 0.8,
-            'circle-stroke-color': '#2b2424',
-            'circle-stroke-width': 1
-        }
-    });
+    map.on('load', function() {
 
-    map.addSource('railroads', { 'type': 'geojson', 'data': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_railroads_north_america.geojson'});
-    map.addLayer({
-        "id": "railroads2",
-        "type": "line",
-        "source": "railroads",
-        "layout": {
-            'visibility': 'none'
-        },
-        "paint": {
-            "line-color": "#FFCC00",
-            "line-width": 3
-        }
-    });
-
-    map.addLayer({
-        "id": "railroads",
-        "type": "line",
-        "source": "railroads",
-        "layout": {
-            'visibility': 'none'
-        },
-        "paint": {
-            "line-color": "#c7515f",
-            "line-width": 3,
-            "line-dasharray": [4,4],
-        }
-    });
-
-    map.addSource('airports', { type: 'geojson', data: 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson' });
-    map.addLayer({
-        "id": "airports",
-        "type": "symbol",
-        "source": "airports",
-        "layout": {
-            "visibility": 'none',
-            'icon-image': 'airport-11'
-
-        },
-        "paint": {}
-    });
-
-    if(VIEW && VIEW.shapes){
-        applyViewShapes()
-    }
-
-    if(VIEW && VIEW.layers && LayerTree){
-        applyViewLayers()
-    }
-
-});
-
-var layers =
-[
-    {
-        'name': 'Group',
-        'directory': 'Misc',
-        'id': 'foo',
-        'icon': 'https://cdn1.iconfinder.com/data/icons/significon/512/Significon-Multiple-512.png',
-        'layerGroup' : [
-            {
-                'id': 'state-boundaries',
-                'source': 'state-boundaries',
-                'name': 'State Bounds'
+        map.addSource('geo-regions', {
+            type: 'geojson',
+            data: emptyGJ
+        });
+        map.addLayer({
+            "id": "geo-regions",
+            "type": "fill",
+            "source": "geo-regions",
+            "layout": {
+                "visibility": 'visible'
             },
-            {
-                'id': 'land',
-                'source': 'land',
-                'name': 'Land'
-            }           
-        ]
-    },
-    {
-        'name': 'Elevated Points',
-        'id': 'elevation-points',
-        'source': 'elevation',
-        'directory': 'Misc'
-    },
-    {
-        'name': 'Railroads 2',
-        'id': 'railroads2',
-        'source': 'railroads',
-        'directory': 'Transportation2',
-    },
-    {
-        'name': 'Railroads',
-        'id': 'railroads',
-        'source': 'railroads',
-        'directory': 'Transportation',
-    },
-    {
-        'name': 'Airports',
-        'id': 'airports',
-        'source': 'airports',
-        'directory': 'Transportation',
-        'icon': 'icons/airplane.svg'
-    }
-   
-];
-
-var draw = new MapboxDraw();
-
-map.addControl(draw);
-
-// Add zoom and rotation controls to the map.
-map.addControl(new mapboxgl.NavigationControl());
-map.addControl(new LayerTree({layers: layers}), 'bottom-left');
-
-var saveViewButton = document.getElementById('menu2')
-
-var link = document.createElement('a');
-link.href = '#';
-link.textContent = 'Save View';
-
-link.onclick = function (e) {
-saveView();
-}
-
-saveViewButton.appendChild(link)
-
-function saveView(cb){
-
-    var shapes = draw.getAll();
-
-    var layers = map.getStyle().layers.filter(function(lyr){return (lyr.source && lyr.source !== 'composite' && lyr.source.indexOf('mapbox-gl-draw')==-1)})
-
-    for(var i=layers.length-1;i>-1;i--){
-
-        if(layers[i].source =='markup'){
-
-            var data = map.getSource('markup')._data;
-
-            if(shapes){
-                //concat features
-                shapes.features = shapes.features.concat(data.features);
-            } else {
-                shapes = map.getSource('markup')._data;
+            "paint": {
+                'fill-color': '#4842f4',
+                'fill-opacity': 0.3
             }
-            layers.splice(i, 1);
+        });
+
+        map.addSource('land', {
+            type: 'geojson',
+            data: emptyGJ
+        });
+        map.addLayer({
+            "id": "lannnd",
+            "type": "fill",
+            "source": "land",
+            "layout": {
+                "visibility": 'visible'
+            },
+            "paint": {
+                'fill-color': '#a89b97',
+                'fill-opacity': 0.8
+            }
+        });
+
+        map.addSource('state-boundaries', {
+            type: 'geojson',
+            data: emptyGJ
+        });
+        map.addLayer({
+            "id": "statttte-boundaries",
+            "type": "fill",
+            "source": "state-boundaries",
+            "layout": {
+                "visibility": 'none'
+            },
+            "paint": {
+                'fill-color': '#CEE5C2',
+                'fill-opacity': 0.8,
+                'fill-outline-color': '#2b2424'
+            }
+        });
+
+        map.addSource('reefs', {
+            type: 'geojson',
+            data: emptyGJ
+        });
+        map.addLayer({
+            "id": "reefs",
+            "type": "line",
+            "source": "reefs",
+            "layout": {
+                'visibility': 'none'
+            },
+            "paint": {
+                "line-color": "#f45353",
+                "line-width": 2
+            }
+        });
+
+        map.addSource('rivers', {
+            type: 'geojson',
+            data: emptyGJ
+        });
+        map.addLayer({
+            "id": "rivers",
+            "type": "line",
+            "source": "rivers",
+            "layout": {
+                'visibility': 'none'
+            },
+            "paint": {
+                "line-color": "#4177f4",
+                "line-width": 2,
+                "line-dasharray": [4, 4],
+            }
+        });
+
+        map.addSource('railroads', {
+            type: 'geojson',
+            data: emptyGJ
+        });
+        map.addLayer({
+            "id": "railroads",
+            "type": "line",
+            "source": "railroads",
+            "layout": {
+                'visibility': 'none'
+            },
+            "paint": {
+                "line-color": "#c7515f",
+                "line-width": 3,
+                "line-dasharray": [4, 4],
+            }
+        });
+
+        map.addSource('glacial', {
+            type: 'geojson',
+            data: emptyGJ
+        });
+
+        map.addLayer({
+            "id": "glaciers",
+            "type": "fill",
+            "source": "glacial",
+            "layout": {
+                "visibility": 'visible'
+            },
+            "paint": {
+                'fill-color': '#b8dae0',
+                'fill-opacity': 1
+            }
+        });
+
+        map.addSource('ports', {
+            type: 'geojson',
+            data: emptyGJ
+        });
+        map.addLayer({
+            "id": "port",
+            "type": "circle",
+            "source": "ports",
+            "layout": {
+                "visibility": 'visible'
+
+            },
+            "paint": {
+                'circle-color': '#e10da3',
+                'circle-opacity': 0.8,
+                'circle-stroke-color': '#000',
+                'circle-stroke-width': 1
+            }
+        });
+
+        map.addSource('airports', {
+            type: 'geojson',
+            data: emptyGJ
+        });
+        map.addLayer({
+            "id": "airport",
+            "type": "circle",
+            "source": "airports",
+            "layout": {
+                "visibility": 'visible'
+
+            },
+            "paint": {
+                'circle-color': '#0de171',
+                'circle-opacity': 0.8,
+                'circle-stroke-color': '#000',
+                'circle-stroke-width': 1
+            }
+        });
+
+        if (VIEW && VIEW.shapes) {
+            applyViewShapes()
         }
-    }
-
-    layers = layers.map(function(lyr){
-
-        var $directory = $('#' + lyr.id).parent();
-
-        if(!$directory.hasClass('layer-directory')){
-        	$directory = $directory.parent();
+        if (VIEW && VIEW.layers && LayerTree) {
+            applyViewLayers()
         }
-
-		var layerObj = {
-			'id': lyr.id,
-			'visibility': (map.getLayoutProperty(lyr.id, "visibility") || 'visible'),
-			'directory': $directory.attr('id'),
-			'directoryOpen': $('#' + lyr.id).is(':visible')
-		}
-
-        if($('#'+lyr.id).parent().attr('childlayers')){
-            layerObj.groupLayer = $('#'+lyr.id).parent().attr('id');
-            //delete layerObj.directory;
-            //delete layerObj.directoryOpen;
-        }
-
-        return layerObj;
-
     })
 
-    //layers.reverse();
 
-    var obj = {
-        map:{
-            zoom: map.getZoom(),
-            center: [map.getCenter().lng, map.getCenter().lat],
-            bearing: map.getBearing(),
-            pitch:map.getPitch()
-        }, 
-        layers:layers
+    var layers =
+
+        [{
+            'name': 'Geo Regions',
+            'id': 'geo-regions',
+            'source': 'geo-regions',
+            // **** SOURCE PATH IS NOW HERE ****
+            'path': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_geography_regions_polys.geojson',
+            'directory': 'Misc',
+        }, {
+            'name': 'Land',
+            'id': 'lannnd',
+            'source': 'land',
+            // **** SOURCE PATH IS NOW HERE ****
+            'path': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_land.geojson',
+            'directory': 'Directory 1',
+        }, {
+            'name': 'State Boundaries',
+            'id': 'statttte-boundaries',
+            'source': "state-boundaries",
+            // **** SOURCE PATH IS NOW HERE ****
+            'path': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_1_states_provinces_shp.geojson',
+            'directory': 'Directory 1',
+        }, {
+            'name': 'R Things',
+            'id': 'r-group',
+            'layerGroup': [{
+                'name': 'Reefs',
+                'id': 'reefs',
+                'source': 'reefs',
+                // **** SOURCE PATH IS NOW HERE ****
+                'path': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_reefs.geojson'
+            }, {
+                'name': 'Rivers',
+                'id': 'rivers',
+                'source': 'rivers',
+                // **** SOURCE PATH IS NOW HERE ****
+                'path': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_rivers_lake_centerlines_scale_rank.geojson'
+            }, {
+                'name': 'Railroads',
+                'id': 'railroads',
+                'source': 'railroads',
+                // **** SOURCE PATH IS NOW HERE ****
+                'path': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_railroads_north_america.geojson'
+            }],
+            'directory': 'Directory 2'
+        }, {
+            'name': 'Glaciers',
+            'id': 'glaciers',
+            'source': 'glacial',
+            // **** SOURCE PATH IS NOW HERE ****
+            'path': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_glaciated_areas.geojson',
+            'directory': 'Directory 2',
+        }, {
+            'name': 'Travel Points',
+            'id': 'travel-group',
+            'layerGroup': [{
+                'id': 'port',
+                'source': 'ports',
+                'name': 'Shipping Locations',
+                // **** SOURCE PATH IS NOW HERE ****
+                'path': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_ports.geojson'
+            }, {
+                'id': 'airport',
+                'source': 'airports',
+                'name': 'Airport Locations',
+                // **** SOURCE PATH IS NOW HERE ****
+                'path': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson'
+            }],
+            'directory': 'Directory 2'
+        }];
+
+
+    var draw = new MapboxDraw();
+
+    map.addControl(draw);
+
+    // Add zoom and rotation controls to the map.
+    map.addControl(new mapboxgl.NavigationControl());
+    map.addControl(new LayerTree({
+        layers: layers,
+        // **** onClickLoad PARAM ****
+        onClickLoad: true
+    }), 'bottom-left');
+
+    var saveViewButton = document.getElementById('menu2')
+
+    var link = document.createElement('a');
+    link.href = '#';
+    link.textContent = 'Save View';
+
+    link.onclick = function(e) {
+        saveView();
     }
 
-    if (shapes.features.length){
-        obj.shapes = shapes;
-    }
+    saveViewButton.appendChild(link)
 
-    var oReq = new XMLHttpRequest();
+    function saveView(cb) {
 
-    oReq.onload = function (e) {
-        var obj = oReq.response;
+        var shapes = draw.getAll();
 
-        if(typeof(obj) === 'string'){
-            obj = JSON.parse(obj)
-        }
-        location.hash='#'+obj.id;
-
-        if(cb){
-            cb(obj.id);
-        }
-    };
-
-    var url = 'view/';  
-    
-    // if(location.pathname.substr(-1) !=='/'){
-    //     window.history.pushState("object or string", "Title", location.pathname+'/');
-    // }
-
-    oReq.open('POST', url, true);
-    oReq.responseType = 'json';
-    oReq.setRequestHeader('Content-Type', 'application/json');
-
-    oReq.send(JSON.stringify(obj));
-}
-
-function getView(viewID){
-    var oReq = new XMLHttpRequest();
-    oReq.onload = function (e) {
-
-        VIEW = oReq.response;
-
-        if(typeof(VIEW)==='string'){
-            VIEW =JSON.parse(VIEW)
-        }
-       applyView()
-    };
-    oReq.open('GET', './view/'+viewID, true);
-    oReq.responseType = 'json';
-    oReq.send();
-}
-
-function applyView(viewObj){
-    map.setZoom(VIEW.map.zoom);
-    map.setBearing(VIEW.map.bearing);
-    map.setPitch(VIEW.map.pitch);
-    map.setCenter(VIEW.map.center);
-}
-
-function applyViewShapes(){
-	var i = 1;
-    VIEW.shapes.features.forEach(function(shape){
-        setTimeout(function(){draw.add(shape)},i*1);
-        i++
-    })
-}
-
-function applyViewLayers(){
-    $('.mapboxgl-ctrl.legend-container').on('show', function(){
-
-        var $lyr, newDirOrder = [], newLyrOrder = [];
-
-        VIEW.layers.forEach(function(lyr){
-
-            newLyrOrder.push(lyr.id);
-
-            map.setLayoutProperty(lyr.id, 'visibility', lyr.visibility);
-            if(LayerTree){
-                if(lyr.groupLayer){
-                        document.getElementById(lyr.groupLayer).children[0].checked = lyr.visibility=='visible';
-                } else if(document.getElementById(lyr.id)){
-                        document.getElementById(lyr.id).children[0].checked = lyr.visibility=='visible';
-                }
-            }
-
-            if(!newDirOrder[lyr.directory]){
-                newDirOrder[lyr.directory] = [];
-            }
-
-            newDirOrder[lyr.directory].push(lyr.id);
-
-        })
-        
-        Object.keys(newDirOrder).reverse().forEach(function(dir){
-            $('#mapboxgl-legend').append($('#'+dir))
-            newDirOrder[dir].reverse().forEach(function(lyr){
-                $lyr = $('#'+lyr);
-                $('#'+dir).append($lyr);
-                
-            })
+        var layers = map.getStyle().layers.filter(function(lyr) {
+            return (lyr.source && lyr.source !== 'composite' && lyr.source.indexOf('mapbox-gl-draw') == -1)
         })
 
-        //directory order
+        for (var i = layers.length - 1; i > -1; i--) {
 
-        var orderArray = [];
-        var layers = map.getStyle().layers;
+            if (layers[i].source == 'markup') {
 
-        //newDirOrder.reverse();
-        //this loop starts at the directory above the lowest indexed
-        for (var i = newDirOrder.length - 2; i >= 0; i--) {
-            var dir = newDirOrder[i];
-            var layerArray = $('#' + dir).sortable('toArray');
+                var data = map.getSource('markup')._data;
 
-            for (var j = layerArray.length - 1; j >= 0; j--) {
-                map.moveLayer(layerArray[j]);
-            };
+                if (shapes) {
+                    //concat features
+                    shapes.features = shapes.features.concat(data.features);
+                } else {
+                    shapes = map.getSource('markup')._data;
+                }
+                layers.splice(i, 1);
+            }
         }
 
-        // sort layers
+        layers = layers.map(function(lyr) {
 
-        var  orderArray =[];
+            var $directory = $('#' + lyr.id).parent();
 
-        for (var i =newLyrOrder.length - 1; i >= 0; i--) {
+            if (!$directory.hasClass('layer-directory')) {
+                $directory = $directory.parent();
+            }
 
-            //findLayerIndex is a method exposed by LayerTree
-            var layerIndex = findLayerIndex(layers, newLyrOrder, i);
 
-            if (layerIndex) {
-                var obj = {
-                    'originalOrder': layerIndex,
-                    'newOrder': i,
-                    'id': newLyrOrder[i]
-                }
-                orderArray.push(obj);
+            var layerObj = {
+                'id': lyr.id,
+                'visibility': (map.getLayoutProperty(lyr.id, "visibility") || 'visible'),
+                'directory': $directory.attr('id'),
+                'directoryOpen': $('#' + lyr.id).is(':visible')
+            }
+
+            if ($('#' + lyr.id).parent().attr('childlayers')) {
+                layerObj.groupLayer = $('#' + lyr.id).parent().attr('id');
+                //delete layerObj.directory;
+                //delete layerObj.directoryOpen;
+            }
+
+            return layerObj;
+
+        })
+
+        //layers.reverse();
+
+        var obj = {
+            map: {
+                zoom: map.getZoom(),
+                center: [map.getCenter().lng, map.getCenter().lat],
+                bearing: map.getBearing(),
+                pitch: map.getPitch()
+            },
+            layers: layers
+        }
+
+        if (shapes.features.length) {
+            obj.shapes = shapes;
+        }
+
+        var oReq = new XMLHttpRequest();
+
+        oReq.onload = function(e) {
+            var obj = oReq.response;
+
+            if (typeof(obj) === 'string') {
+                obj = JSON.parse(obj)
+            }
+            location.hash = '#' + obj.id;
+
+            if (cb) {
+                cb(obj.id);
             }
         };
 
-        //move layer order
-        orderArray.sort(function(a, b) {
-            if (b.newOrder > a.newOrder) {
-                map.moveLayer(a.id, b.id);
-            } else {
-                map.moveLayer(b.id, a.id);
-            }
-        })
-    })
-}
+        var url = 'view/';
 
-var viewID=location.hash.replace('#','')
-
-if(viewID){
-    getView(viewID)
-}
-
-// var showViewButton = document.getElementById('menu3')
-
-// var link = document.createElement('a');
-// link.className='click-button';
-// link.textContent = 'Share View';
-
-// link.onclick = function (e) {
-
-//     function share(id){
-
-//         var x = prompt('Please enter an email address to share this view:')
-
-//         if(x){
-
-//             var obj = {'id':id, 'recpt':x};
-
-//             var oReq = new XMLHttpRequest();
-
-//             oReq.onload = function (e) {
-//                alert('your view has been shared')
-//             };
-            
-//             if(location.pathname.substr(-1) !=='/'){
-//                 window.history.pushState("object or string", "Title", location.pathname+'/');
-//             }
-
-//             oReq.open('POST', 'share/', true);
-//             oReq.responseType = 'json';
-//             oReq.setRequestHeader('Content-Type', 'application/json');
-
-//             oReq.send(JSON.stringify(obj));
-//         }
-//     }
-
-//     //do we have a view hash?
-//     if(!location.hash){
-//         saveView(share) 
-//     } else {
-//         share(location.hash.replace('#',''))
-//     }
-    
-// }
-
-saveViewButton.appendChild(link)
-
-// https://tc39.github.io/ecma262/#sec-array.prototype.find
-if (!Array.prototype.find) {
-  Object.defineProperty(Array.prototype, 'find', {
-    value: function(predicate) {
-     // 1. Let O be ? ToObject(this value).
-      if (this == null) {
-        throw new TypeError('"this" is null or not defined');
-      }
-
-      var o = Object(this);
-
-      // 2. Let len be ? ToLength(? Get(O, "length")).
-      var len = o.length >>> 0;
-
-      // 3. If IsCallable(predicate) is false, throw a TypeError exception.
-      if (typeof predicate !== 'function') {
-        throw new TypeError('predicate must be a function');
-      }
-
-      // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
-      var thisArg = arguments[1];
-
-      // 5. Let k be 0.
-      var k = 0;
-
-      // 6. Repeat, while k < len
-      while (k < len) {
-        // a. Let Pk be ! ToString(k).
-        // b. Let kValue be ? Get(O, Pk).
-        // c. Let testResult be ToBoolean(? Call(predicate, T, « kValue, k, O »)).
-        // d. If testResult is true, return kValue.
-        var kValue = o[k];
-        if (predicate.call(thisArg, kValue, k, o)) {
-          return kValue;
+        if (location.pathname.substr(-1) !== '/') {
+            window.history.pushState("object or string", "Title", location.pathname + '/');
         }
-        // e. Increase k by 1.
-        k++;
-      }
 
-      // 7. Return undefined.
-      return undefined;
+        oReq.open('POST', url, true);
+        oReq.responseType = 'json';
+        oReq.setRequestHeader('Content-Type', 'application/json');
+        oReq.send(JSON.stringify(obj));
     }
-  });
-}
-</script>
+
+    function getView(viewID) {
+        var oReq = new XMLHttpRequest();
+        oReq.onload = function(e) {
+
+            VIEW = oReq.response;
+
+            if (typeof(VIEW) === 'string') {
+                VIEW = JSON.parse(VIEW)
+            }
+            applyView()
+        };
+        oReq.open('GET', './view/' + viewID, true);
+        oReq.responseType = 'json';
+        oReq.send();
+    }
+
+    function applyView(viewObj) {
+        map.setZoom(VIEW.map.zoom);
+        map.setBearing(VIEW.map.bearing);
+        map.setPitch(VIEW.map.pitch);
+        map.setCenter(VIEW.map.center);
+    }
+
+    function applyViewShapes() {
+        var i = 1;
+        VIEW.shapes.features.forEach(function(shape) {
+            setTimeout(function() {
+                draw.add(shape)
+            }, i * 1);
+            i++
+        })
+    }
+
+    function applyViewLayers() {
+        $('.mapboxgl-ctrl.legend-container').on('show', function() {
+            var $lyr, newDirOrder = [],
+                newLyrOrder = [];
+
+            VIEW.layers.forEach(function(lyr) {
+                newLyrOrder.push(lyr.id);
+
+                map.setLayoutProperty(lyr.id, 'visibility', lyr.visibility);
+                if (LayerTree) {
+                    var sourceId = map.getLayer(lyr.id).source;
+                    var lyrSource = map.getSource(sourceId);
+                    if (lyr.groupLayer) {
+                        document.getElementById(lyr.groupLayer).children[0].checked = lyr.visibility == 'visible';
+                        checkSource(map, lyrSource, lyr.groupLayer, lyr.id);
+                    } else if (document.getElementById(lyr.id)) {
+                        document.getElementById(lyr.id).children[0].checked = lyr.visibility == 'visible';
+                        checkSource(map, lyrSource, lyr.id);
+                    }
+                }
+
+                if (!newDirOrder[lyr.directory]) {
+                    newDirOrder[lyr.directory] = [];
+                }
+
+                newDirOrder[lyr.directory].push(lyr.id);
+            })
+
+            // check if source has already been loaded on click
+            function checkSource(map, lyrSource, lyrId, lgId) {
+                if (onClickEnabled(map.onClickLoad, lyrSource, lgId)) {
+
+                    var ly = $.grep(map.lyrs, function(i) {
+                        return lyrId === i.id;
+                    });
+
+                    if (ly.length) {
+                        // layerGroup
+                        if (lgId) {
+                            var lgLy = $.grep(ly[0].layerGroup, function(i) {
+                                return lgId === i.id;
+                            });
+
+                            // set empty sources with defined path from layer config
+                            map.getSource(lyrSource.id).setData(lgLy[0].path);
+
+                            // non grouped layers
+                        } else {
+                            // set empty sources with defined path from layer config
+                            map.getSource(lyrSource.id).setData(ly[0].path)
+                        }
+                    }
+                }
+            }
+
+            Object.keys(newDirOrder).reverse().forEach(function(dir) {
+                $('#mapboxgl-legend').append($('#' + dir))
+                newDirOrder[dir].reverse().forEach(function(lyr) {
+                    $lyr = $('#' + lyr);
+
+                    //check for group layers
+                    if ($lyr.hasClass('child-layer')) {
+                        // if first child layer - move the parent(groupLayer) div
+                        if ($lyr.parent().children('child-layer').first()) {
+                            $('#' + dir).append($lyr.parent());
+                        }
+                    } else {
+                        $('#' + dir).append($lyr);
+                    }
+
+                })
+            })
+
+            var orderArray = [];
+            var layers = map.getStyle().layers;
+
+            //newDirOrder.reverse();
+            //this loop starts at the directory above the lowest indexed
+            for (var i = newDirOrder.length - 2; i >= 0; i--) {
+                var dir = newDirOrder[i];
+                var layerArray = $('#' + dir).sortable('toArray');
+
+                for (var j = layerArray.length - 1; j >= 0; j--) {
+                    map.moveLayer(layerArray[j]);
+                };
+            }
+
+            // sort layers
+            var orderArray = [];
+
+            for (var nl = newLyrOrder.length - 1; nl >= 0; nl--) {
+                if (nl !== 0) {
+                    map.moveLayer(newLyrOrder[nl - 1], newLyrOrder[nl])
+                }
+            };
+        })
+    }
+
+    var viewID = location.hash.replace('#', '')
+
+    if (viewID) {
+        getView(viewID)
+    }
+
+    // var showViewButton = document.getElementById('menu3')
+
+    // var link = document.createElement('a');
+    // link.className='click-button';
+    // link.textContent = 'Share View';
+
+    // link.onclick = function (e) {
+
+    //     function share(id){
+
+    //         var x = prompt('Please enter an email address to share this view:')
+
+    //         if(x){
+
+    //             var obj = {'id':id, 'recpt':x};
+
+    //             var oReq = new XMLHttpRequest();
+
+    //             oReq.onload = function (e) {
+    //                alert('your view has been shared')
+    //             };
+
+    //             if(location.pathname.substr(-1) !=='/'){
+    //                 window.history.pushState("object or string", "Title", location.pathname+'/');
+    //             }
+
+    //             oReq.open('POST', 'share/', true);
+    //             oReq.responseType = 'json';
+    //             oReq.setRequestHeader('Content-Type', 'application/json');
+
+    //             oReq.send(JSON.stringify(obj));
+    //         }
+    //     }
+
+    //     //do we have a view hash?
+    //     if(!location.hash){
+    //         saveView(share) 
+    //     } else {
+    //         share(location.hash.replace('#',''))
+    //     }
+
+    // }
+
+    saveViewButton.appendChild(link)
+
+    // https://tc39.github.io/ecma262/#sec-array.prototype.find
+    if (!Array.prototype.find) {
+        Object.defineProperty(Array.prototype, 'find', {
+            value: function(predicate) {
+                // 1. Let O be ? ToObject(this value).
+                if (this == null) {
+                    throw new TypeError('"this" is null or not defined');
+                }
+
+                var o = Object(this);
+
+                // 2. Let len be ? ToLength(? Get(O, "length")).
+                var len = o.length >>> 0;
+
+                // 3. If IsCallable(predicate) is false, throw a TypeError exception.
+                if (typeof predicate !== 'function') {
+                    throw new TypeError('predicate must be a function');
+                }
+
+                // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
+                var thisArg = arguments[1];
+
+                // 5. Let k be 0.
+                var k = 0;
+
+                // 6. Repeat, while k < len
+                while (k < len) {
+                    // a. Let Pk be ! ToString(k).
+                    // b. Let kValue be ? Get(O, Pk).
+                    // c. Let testResult be ToBoolean(? Call(predicate, T, « kValue, k, O »)).
+                    // d. If testResult is true, return kValue.
+                    var kValue = o[k];
+                    if (predicate.call(thisArg, kValue, k, o)) {
+                        return kValue;
+                    }
+                    // e. Increase k by 1.
+                    k++;
+                }
+
+                // 7. Return undefined.
+                return undefined;
+            }
+        });
+    }
+    </script>
 </body>
+
 </html>
