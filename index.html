@@ -100,10 +100,12 @@
     <!-- <nav id="menu3"></nav> -->
     <div id="map"></div>
     <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.32.1/mapbox-gl.js'></script>
-    <script src='https://cdn.rawgit.com/TheGartrellGroup/Mapbox-GL-JS-Layer-Tree/master/dist/js/scripts.min.js'></script>
+    <script src='https://rawgit.com/TheGartrellGroup/Mapbox-GL-JS-Layer-Tree/master/dist/js/scripts.min.js'></script>
     <script src='https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v0.16.0/mapbox-gl-draw.js'></script>
     <script>
     mapboxgl.accessToken = '';
+
+
 
     var VIEW;
 
@@ -530,10 +532,10 @@
                     var lyrSource = map.getSource(sourceId);
                     if (lyr.groupLayer) {
                         document.getElementById(lyr.groupLayer).children[0].checked = lyr.visibility == 'visible';
-                        checkSource(map, lyrSource, lyr.groupLayer, lyr.id);
+                        checkSource(map, lyrSource, lyr.groupLayer, lyr.id,  lyr.visibility);
                     } else if (document.getElementById(lyr.id)) {
                         document.getElementById(lyr.id).children[0].checked = lyr.visibility == 'visible';
-                        checkSource(map, lyrSource, lyr.id);
+                        checkSource(map, lyrSource, lyr.id, false,  lyr.visibility);
                     }
                 }
 
@@ -545,9 +547,8 @@
             })
 
             // check if source has already been loaded on click
-            function checkSource(map, lyrSource, lyrId, lgId) {
+            function checkSource(map, lyrSource, lyrId, lgId, visibility) {
                 if (onClickEnabled(map.onClickLoad, lyrSource, lgId)) {
-
                     var ly = $.grep(map.lyrs, function(i) {
                         return lyrId === i.id;
                     });
@@ -559,14 +560,13 @@
                                 return lgId === i.id;
                             });
 
-                            // set empty sources with defined path from layer config
-                            map.getSource(lyrSource.id).setData(lgLy[0].path);
-
+                            var sourceData = visibility === 'visible' ? lgLy[0].path : emptyGJ
                             // non grouped layers
                         } else {
-                            // set empty sources with defined path from layer config
-                            map.getSource(lyrSource.id).setData(ly[0].path)
+                            var sourceData = visibility === 'visible' ? ly[0].path : emptyGJ
                         }
+
+                        map.getSource(lyrSource.id).setData(sourceData)
                     }
                 }
             }
