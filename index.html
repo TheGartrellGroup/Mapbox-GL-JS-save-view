@@ -416,7 +416,7 @@
             }
         }
 
-        layers = layers.map(function(lyr) {
+        var lyrConfigLayers = layers.filter(function(lyr) {
             //get non-grouped layers
             var ly = $.grep(map.lyrs, function(i) {
                 return lyr.id === i.id;
@@ -443,46 +443,27 @@
             }
 
             //does this lyr.id exist in the LayerConfig?
-            //if so, construct a saved layerObj
-            if (ly.length || gLy.length) {
-                var $directory = $('#' + lyr.id).parent();
+            return (ly.length || gLy.length)
+        }).map(function(ly) {
+            var $directory = $('#' + ly.id).parent();
 
-                if (!$directory.hasClass('layer-directory')) {
-                    $directory = $directory.parent();
-                }
-
-                var layerObj = {
-                    'id': lyr.id,
-                    'visibility': (map.getLayoutProperty(lyr.id, "visibility") || 'visible'),
-                    'directory': $directory.attr('id'),
-                    'directoryOpen': $('#' + lyr.id).is(':visible')
-                }
-
-                if ($('#' + lyr.id).parent().attr('childlayers')) {
-                    layerObj.groupLayer = $('#' + lyr.id).parent().attr('id');
-                }
-
-                return layerObj;
+            if (!$directory.hasClass('layer-directory')) {
+                $directory = $directory.parent();
             }
 
+            var layerObj = {
+                'id': ly.id,
+                'visibility': (map.getLayoutProperty(ly.id, "visibility") || 'visible'),
+                'directory': $directory.attr('id'),
+                'directoryOpen': $('#' + ly.id).is(':visible')
+            }
+
+            if ($('#' + ly.id).parent().attr('childlayers')) {
+                layerObj.groupLayer = $('#' + ly.id).parent().attr('id');
+            }
+
+            return layerObj;
         })
-
-        //find if object is undefined (not part of the layer config)
-        var removePositions = [];
-        for (var i = layers.length - 1; i >= 0; i--) {
-            if (layers[i] === undefined) {
-                removePositions.push(i)
-            }
-        };
-
-        if (removePositions.length) {
-            //order the list of removal index positions
-            removePositions.sort(function(a,b){ return b - a; });
-            for (var p = removePositions.length - 1; p >= 0; p--) {
-                //remove from layers array - while respecting index order
-                layers.splice(removePositions[p], 1)
-            };
-        }
 
         var obj = {
             map: {
@@ -491,7 +472,7 @@
                 bearing: map.getBearing(),
                 pitch: map.getPitch()
             },
-            layers: layers
+            layers: lyrConfigLayers
         }
 
         if (shapes.features.length) {
