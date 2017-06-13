@@ -14,14 +14,14 @@
         margin: 0;
         padding: 0;
     }
-    
+
     #map {
         position: absolute;
         top: 0;
         bottom: 0;
         width: 100%;
     }
-    
+
     #menu,
     #menu2,
     #menu3 {
@@ -33,22 +33,22 @@
         border: 1px solid rgba(0, 0, 0, 0.4);
         font-family: 'Open Sans', sans-serif;
     }
-    
+
     #menu {
         top: 50px;
         right: 10px;
     }
-    
+
     #menu2 {
         bottom: 30px;
         right: 10px;
     }
-    
+
     #menu3 {
         bottom: 70px;
         right: 10px;
     }
-    
+
     #menu a,
     #menu2 a,
     #menu3 a {
@@ -62,33 +62,33 @@
         border-bottom: 1px solid rgba(0, 0, 0, 0.25);
         text-align: center;
     }
-    
+
     #menu a:last-child,
     #menu2 a:last-child,
     #menu3 a:last-child {
         border: none;
     }
-    
+
     #menu a:hover,
     #menu2 a:hover,
     #menu3 a:hover {
         background-color: #f8f8f8;
         color: #404040;
     }
-    
+
     #menu a.active,
     #menu2 a.active,
     #menu3 a:active {
         background-color: #3887be;
         color: #ffffff;
     }
-    
+
     #menu a.active:hover,
     #menu2 a.active:hover,
     #menu3 a.active:hover {
         background: #3074a4;
     }
-    
+
     .click-button {
         cursor: pointer;
     }
@@ -417,32 +417,72 @@
         }
 
         layers = layers.map(function(lyr) {
+            //get non-grouped layers
+            var ly = $.grep(map.lyrs, function(i) {
+                return lyr.id === i.id;
+            });
 
-            var $directory = $('#' + lyr.id).parent();
+            if (!ly.length) {
+                //get grouped layers
+                var groupLyrs = map.lyrs.filter(function (o) {
+                  return o.hasOwnProperty('layerGroup')
+                });
 
-            if (!$directory.hasClass('layer-directory')) {
-                $directory = $directory.parent();
+                if (groupLyrs.length) {
+                    var gLy = [];
+                    for (var i = groupLyrs.length - 1; i >= 0; i--) {
+                        var sub = groupLyrs[i].layerGroup.filter(function (g) {
+                            return lyr.id === g.id
+                        })
+
+                        if (sub.length) {
+                            gLy = sub
+                        }
+                    }
+                }
             }
 
+            //does this lyr.id exist in the LayerConfig?
+            //if so, construct a saved layerObj
+            if (ly.length || gLy.length) {
+                var $directory = $('#' + lyr.id).parent();
 
-            var layerObj = {
-                'id': lyr.id,
-                'visibility': (map.getLayoutProperty(lyr.id, "visibility") || 'visible'),
-                'directory': $directory.attr('id'),
-                'directoryOpen': $('#' + lyr.id).is(':visible')
+                if (!$directory.hasClass('layer-directory')) {
+                    $directory = $directory.parent();
+                }
+
+                var layerObj = {
+                    'id': lyr.id,
+                    'visibility': (map.getLayoutProperty(lyr.id, "visibility") || 'visible'),
+                    'directory': $directory.attr('id'),
+                    'directoryOpen': $('#' + lyr.id).is(':visible')
+                }
+
+                if ($('#' + lyr.id).parent().attr('childlayers')) {
+                    layerObj.groupLayer = $('#' + lyr.id).parent().attr('id');
+                }
+
+                return layerObj;
             }
-
-            if ($('#' + lyr.id).parent().attr('childlayers')) {
-                layerObj.groupLayer = $('#' + lyr.id).parent().attr('id');
-                //delete layerObj.directory;
-                //delete layerObj.directoryOpen;
-            }
-
-            return layerObj;
 
         })
 
-        //layers.reverse();
+        //find if object is undefined (not part of the layer config)
+        var removePositions = [];
+        for (var i = layers.length - 1; i >= 0; i--) {
+            if (layers[i] === undefined) {
+                removePositions.push(i)
+            }
+        };
+
+        if (removePositions.length) {
+            //order the list of removal index positions
+            removePositions.sort(function(a,b){ return b - a; });
+            for (var p = removePositions.length - 1; p >= 0; p--) {
+                //remove from layers array - while respecting index order
+                layers.splice(removePositions[p], 1)
+            };
+        }
 
         var obj = {
             map: {
@@ -656,7 +696,7 @@
 
     //     //do we have a view hash?
     //     if(!location.hash){
-    //         saveView(share) 
+    //         saveView(share)
     //     } else {
     //         share(location.hash.replace('#',''))
     //     }
