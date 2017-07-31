@@ -90,7 +90,8 @@ var mapStateSchema = {
 	"properties":{
 		"map" : {"$ref": "/mapSchema"},
 		"layers": {'type':"array", "items":{"$ref": "layerSchema"} },
-		"shapes": {'type':'object'}
+		"shapes": {'type':'object'},
+		"labels": {'type':'array', "items":{'type':'object'}}
 	},
 	"required":["map", "layers"],
 	"additionalProperties": false
@@ -105,13 +106,13 @@ var app = express()
 app.use(bodyParser.json() );       // to support JSON-encoded bodies
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   extended: true
-})); 
+}));
 
 /* write views via post */
 app.post('/view/', function (req, res) {
 
   	fullUrl = req.protocol + '://' + req.get('host') + req.originalUrl;
-  	
+
 	res.header('Content-Type', 'application/javascript');
 
 	//validate object
@@ -156,7 +157,7 @@ app.get('/view/:id*?', function (req, res) {
 			return res.status(200).send(obj);
 		}
 	});
-	
+
 });
 
 // app.post('/share/', function (req, res){
@@ -212,7 +213,7 @@ app.get('/:id*?', function(req, res){
 });
 
 app.use(function(req,res){
-	res.status(500).end('{"status": "failure", "message":"Please either POST data to the /view/ function or GET /view/ with a state id"}');
+	res.status(500).end('{"status": "failure", "url":"'+req.headers.host+'", "message":"Please either POST data to the /view/ function or GET /view/ with a state id"}');
 });
 
 app.listen(4005, function () {
@@ -221,7 +222,7 @@ app.listen(4005, function () {
 
 function _writeViewToJSONFile(jsonobj, cb){
 
-	var id = uuid.v1().substr(0, 8); 
+	var id = uuid.v1().substr(0, 8);
 
 	jsonfile.writeFile('./data/'+id+'.json',jsonobj, function(err, msg){
 		if(err){
@@ -244,7 +245,7 @@ function _readViewFromJSONFile(id, cb){
 
 function _writeViewToSQLiteDB(jsonObj, cb){
 
-	var id = uuid.v1().substr(0, 8); 
+	var id = uuid.v1().substr(0, 8);
 
 	db.exec("INSERT into views (id, view) values ('"+id+"', '" +JSON.stringify(jsonObj)+ "')", function(err, row) {
 

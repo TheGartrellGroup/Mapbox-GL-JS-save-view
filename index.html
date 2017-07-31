@@ -162,11 +162,11 @@
             data: emptyGJ
         });
         map.addLayer({
-            "id": "statttte-boundaries",
+            "id": "state-boundaries",
             "type": "fill",
             "source": "state-boundaries",
             "layout": {
-                "visibility": 'none'
+                "visibility": 'visible'
             },
             "paint": {
                 'fill-color': '#CEE5C2',
@@ -286,13 +286,42 @@
             }
         });
 
+        //drawings
         if (VIEW && VIEW.shapes) {
             applyViewShapes()
         }
+        //layers
         if (VIEW && VIEW.layers && LayerTree) {
             applyViewLayers()
         }
+        //labels
+        if (VIEW && VIEW.labels) {
+            applyViewLabels();
+        }
     })
+
+    // map.on("click", function (e) {
+    //     var features = map.queryRenderedFeatures(e.point, { layers: ["state-boundaries"] });
+
+    //     if (map.getLayer("state-boundaries_hl")) {
+    //         map.removeLayer("state-boundaries_hl");
+    //     }
+
+    //     if (features.length) {
+
+    //         map.addLayer({
+    //             "id": "state-boundaries_hl",
+    //             "type": "line",
+    //             "source": "state-boundaries",
+    //             "layout": {},
+    //             "paint": {
+    //                 "line-color": "yellow",
+    //                 "line-width": 3
+    //             },
+    //             "filter": ["==", "adm1_code", features[0].properties.adm1_code],
+    //         });
+    //     }
+    // });
 
 
     var layers =
@@ -301,21 +330,18 @@
             'name': 'Geo Regions',
             'id': 'geo-regions',
             'source': 'geo-regions',
-            // **** SOURCE PATH IS NOW HERE ****
             'path': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_geography_regions_polys.geojson',
             'directory': 'Misc',
         }, {
             'name': 'Land',
             'id': 'lannnd',
             'source': 'land',
-            // **** SOURCE PATH IS NOW HERE ****
             'path': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_land.geojson',
             'directory': 'Directory 1',
         }, {
             'name': 'State Boundaries',
-            'id': 'statttte-boundaries',
+            'id': 'state-boundaries',
             'source': "state-boundaries",
-            // **** SOURCE PATH IS NOW HERE ****
             'path': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_1_states_provinces_shp.geojson',
             'directory': 'Directory 1',
         }, {
@@ -325,19 +351,16 @@
                 'name': 'Reefs',
                 'id': 'reefs',
                 'source': 'reefs',
-                // **** SOURCE PATH IS NOW HERE ****
                 'path': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_reefs.geojson'
             }, {
                 'name': 'Rivers',
                 'id': 'rivers',
                 'source': 'rivers',
-                // **** SOURCE PATH IS NOW HERE ****
                 'path': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_rivers_lake_centerlines_scale_rank.geojson'
             }, {
                 'name': 'Railroads',
                 'id': 'railroads',
                 'source': 'railroads',
-                // **** SOURCE PATH IS NOW HERE ****
                 'path': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_railroads_north_america.geojson'
             }],
             'directory': 'Directory 2'
@@ -345,7 +368,6 @@
             'name': 'Glaciers',
             'id': 'glaciers',
             'source': 'glacial',
-            // **** SOURCE PATH IS NOW HERE ****
             'path': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_glaciated_areas.geojson',
             'directory': 'Directory 2',
         }, {
@@ -355,13 +377,13 @@
                 'id': 'port',
                 'source': 'ports',
                 'name': 'Shipping Locations',
-                // **** SOURCE PATH IS NOW HERE ****
+
                 'path': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_ports.geojson'
             }, {
                 'id': 'airport',
                 'source': 'airports',
                 'name': 'Airport Locations',
-                // **** SOURCE PATH IS NOW HERE ****
+
                 'path': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_10m_airports.geojson'
             }],
             'directory': 'Directory 2'
@@ -369,16 +391,15 @@
 
 
     var draw = new MapboxDraw();
-
     map.addControl(draw);
 
     // Add zoom and rotation controls to the map.
     map.addControl(new mapboxgl.NavigationControl());
     map.addControl(new LayerTree({
         layers: layers,
-        // **** onClickLoad PARAM ****
         onClickLoad: true
     }), 'bottom-left');
+
 
     var saveViewButton = document.getElementById('menu2')
 
@@ -395,7 +416,7 @@
     function saveView(cb) {
 
         var shapes = draw.getAll();
-
+        var labels = [];
         var layers = map.getStyle().layers.filter(function(lyr) {
             return (lyr.source && lyr.source !== 'composite' && lyr.source.indexOf('mapbox-gl-draw') == -1)
         })
@@ -406,17 +427,30 @@
 
                 var data = map.getSource('markup')._data;
 
+                //drawings
                 if (shapes) {
-                    //concat features
                     shapes.features = shapes.features.concat(data.features);
                 } else {
                     shapes = map.getSource('markup')._data;
                 }
+
                 layers.splice(i, 1);
+            }
+
+            //custom text labels
+            if(layers[i].id.indexOf('custom-text-label') > -1) {
+                var customLabel = layers[i];
+                var labelData = map.getSource(customLabel.source)._data;
+
+                customLabel.data = labelData;
+
+                labels.push(customLabel)
             }
         }
 
+        //layer tree config layers
         var lyrConfigLayers = layers.filter(function(lyr) {
+
             //get non-grouped layers
             var ly = $.grep(map.lyrs, function(i) {
                 return lyr.id === i.id;
@@ -479,6 +513,10 @@
             obj.shapes = shapes;
         }
 
+        if (labels.length) {
+            obj.labels = labels;
+        }
+
         var oReq = new XMLHttpRequest();
 
         oReq.onload = function(e) {
@@ -534,6 +572,18 @@
         VIEW.shapes.features.forEach(function(shape) {
             setTimeout(function() {
                 draw.add(shape)
+            }, i * 1);
+            i++
+        })
+    }
+
+    function applyViewLabels() {
+        var i = 1;
+        VIEW.labels.forEach(function(label) {
+            setTimeout(function() {
+                map.addSource(label.source, { type: 'geojson', data: label.data});
+                delete label.data
+                map.addLayer(label)
             }, i * 1);
             i++
         })
@@ -613,7 +663,6 @@
             var orderArray = [];
             var layers = map.getStyle().layers;
 
-            //newDirOrder.reverse();
             //this loop starts at the directory above the lowest indexed
             for (var i = newDirOrder.length - 2; i >= 0; i--) {
                 var dir = newDirOrder[i];
