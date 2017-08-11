@@ -183,6 +183,11 @@ function applyViewLabels() {
             map.addLayer(label)
         }, i * 1);
         i++
+
+        //labels should be the highest layer(s)
+        setTimeout(function() {
+            map.moveLayer(label.id)
+        }, 500);
     })
 }
 
